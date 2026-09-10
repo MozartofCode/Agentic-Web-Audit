@@ -134,15 +134,17 @@ def _generate_audit_md(analysis: ProductAnalysis) -> str:
 def _generate_mcp_server(analysis: ProductAnalysis) -> str:
     tools_ts = []
     for action in analysis.core_actions:
+        endpoint = action.endpoint if action.endpoint != "UNKNOWN" else "(endpoint unknown)"
+        method = action.http_method if action.http_method != "UNKNOWN" else "(method unknown)"
         tools_ts.append(
             f"""  server.tool(
     "{action.name}",
     "{_escape(action.description)}",
     {{
-      // TODO: define input schema fields for {action.endpoint}
+      // TODO: define input schema fields for {endpoint}
     }},
     async (input) => {{
-      // TODO: implement — {action.http_method} {action.endpoint}
+      // TODO: implement — {method} {endpoint}
       throw new Error("Not implemented");
     }}
   );"""

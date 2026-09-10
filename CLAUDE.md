@@ -63,7 +63,7 @@ agentready/
 | Backend | Python FastAPI | Async throughout |
 | HTTP client | `httpx` (async) | Never `requests` |
 | HTML parsing | `BeautifulSoup4` | |
-| LLM | Groq API — `llama-3.3-70b-versatile` | Temperature always `0.1` for structured output |
+| LLM | Groq API — `openai/gpt-oss-120b` | Temperature always `0.1` for structured output |
 | GitHub data | GitHub REST API (unauthenticated) | Public repos only |
 | Syntax highlighting | `react-syntax-highlighter` | Custom theme in UI.md |
 | Deployment | Vercel (frontend), Railway (backend) | |
@@ -206,7 +206,7 @@ wait for the result and then click "New Analysis" in the header.
 
 ## LLM Usage Rules
 
-1. **Model**: Always `llama-3.3-70b-versatile` via Groq. Never change this without updating CLAUDE.md.
+1. **Model**: Always `openai/gpt-oss-120b` via Groq. Never change this without updating CLAUDE.md.
 2. **Temperature**: Always `0.1` for structured JSON output calls.
 3. **Max tokens**: `2000` for the main analysis call.
 4. **System prompt**: Must instruct the model to return ONLY valid JSON, no markdown fences,

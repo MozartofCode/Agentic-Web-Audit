@@ -12,7 +12,7 @@ from prompts import SYSTEM_PROMPT, build_analysis_prompt
 
 logger = logging.getLogger(__name__)
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "openai/gpt-oss-120b"
 TEMPERATURE = 0.1
 MAX_TOKENS = 2000
 

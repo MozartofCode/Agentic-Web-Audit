@@ -51,16 +51,13 @@ export default function ArtifactSection({ artifacts }) {
               role="tab"
               aria-selected={isActive}
               onClick={() => handleTabChange(tab.key)}
-              className={`flex items-center gap-2 border-b-2 px-4 py-2.5 font-ui text-[14px] font-medium transition-colors duration-100 ${
+              className={`border-b-2 px-4 py-2.5 font-ui text-[14px] font-medium transition-colors duration-100 ${
                 isActive
                   ? 'border-b-accent bg-bg-elevated text-text-primary'
                   : 'border-b-transparent text-text-muted hover:bg-bg-elevated/50 hover:text-text-secondary'
               }`}
             >
               {tab.label}
-              <span className="hidden font-code text-[11px] text-text-muted sm:inline">
-                {tab.filename}
-              </span>
             </button>
           )
         })}

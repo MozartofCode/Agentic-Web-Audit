@@ -13,7 +13,6 @@ export default function App() {
   const [inputMode, setInputMode] = useState('website') // 'website' | 'github'
   const [websiteUrl, setWebsiteUrl] = useState('')
   const [githubUrl, setGithubUrl] = useState('')
-  const [elapsedSeconds, setElapsedSeconds] = useState(null)
 
   async function handleSubmit() {
     const activeUrl = inputMode === 'website' ? websiteUrl.trim() : githubUrl.trim()
@@ -27,14 +26,11 @@ export default function App() {
     setErrorMsg('')
     setAppState('loading')
 
-    const startedAt = performance.now()
-
     try {
       const data = await analyzeProduct({
         websiteUrl: inputMode === 'website' ? activeUrl : '',
         githubUrl: inputMode === 'github' ? activeUrl : '',
       })
-      setElapsedSeconds(Math.round((performance.now() - startedAt) / 1000))
       setResults(data)
       setAppState('done')
     } catch (err) {
@@ -51,7 +47,6 @@ export default function App() {
     setInputMode('website')
     setWebsiteUrl('')
     setGithubUrl('')
-    setElapsedSeconds(null)
   }
 
   return (
@@ -76,14 +71,7 @@ export default function App() {
           />
         )}
 
-        {appState === 'done' && results && (
-          <ResultsView
-            results={results}
-            websiteUrl={websiteUrl}
-            githubUrl={githubUrl}
-            elapsedSeconds={elapsedSeconds}
-          />
-        )}
+        {appState === 'done' && results && <ResultsView results={results} />}
       </main>
     </div>
   )

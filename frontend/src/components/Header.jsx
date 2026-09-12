@@ -1,7 +1,7 @@
 export default function Header({ showNewAnalysis, onNewAnalysis }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-100 h-14 border-b border-border-subtle bg-bg-base/85 backdrop-blur-md">
-      <div className="mx-auto flex h-full max-w-[900px] items-center justify-end px-6">
+      <div className="mx-auto flex h-full max-w-[900px] items-center justify-between px-6">
         {showNewAnalysis ? (
           <button
             type="button"
@@ -11,6 +11,10 @@ export default function Header({ showNewAnalysis, onNewAnalysis }) {
             ← New Analysis
           </button>
         ) : (
+          <span />
+        )}
+
+        {!showNewAnalysis && (
           <a
             href="https://github.com"
             target="_blank"

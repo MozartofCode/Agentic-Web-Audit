@@ -85,15 +85,24 @@ export default function InputForm({
       <button
         type="submit"
         disabled={loading}
-        className="group mt-6 h-12 w-full rounded bg-accent font-ui text-[15px] font-semibold tracking-[-0.01em] text-bg-base transition-all duration-100 hover:brightness-108 active:brightness-92 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-accent/30"
+        className="group mt-6 flex h-12 w-full items-center justify-center gap-2 rounded bg-accent font-ui text-[15px] font-semibold tracking-[-0.01em] text-bg-base transition-all duration-100 hover:brightness-108 active:brightness-92 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-accent/30"
       >
-        Analyze my product{' '}
-        <span className="inline-block transition-transform duration-100 group-hover:translate-x-1">
-          →
-        </span>
+        <span>Analyze my product</span>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 20 20"
+          fill="none"
+          className="h-4 w-4 shrink-0 transition-transform duration-150 group-hover:translate-x-0.5"
+        >
+          <path
+            d="M4 10h12M12 5l5 5-5 5"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       </button>
-
-      <p className="mt-3 text-center font-ui text-[13px] text-text-muted">Public repos only</p>
     </form>
   )
 }

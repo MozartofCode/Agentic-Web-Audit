@@ -3,7 +3,7 @@ import AuditScoreCard from './AuditScoreCard'
 
 export default function ResultsView({ results }) {
   return (
-    <section className="results-enter mx-auto max-w-[900px] px-6 pb-24 pt-24">
+    <section className="results-enter mx-auto max-w-[900px] px-6 pb-24 pt-8">
       <div className="rounded border border-border-subtle bg-bg-surface p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="font-ui text-[18px] font-semibold tracking-[-0.02em] text-text-primary">

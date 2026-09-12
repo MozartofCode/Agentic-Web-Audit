@@ -10,13 +10,16 @@ export default function App() {
   const [results, setResults] = useState(null)
   const [errorMsg, setErrorMsg] = useState('')
   const [validationError, setValidationError] = useState('')
+  const [inputMode, setInputMode] = useState('website') // 'website' | 'github'
   const [websiteUrl, setWebsiteUrl] = useState('')
   const [githubUrl, setGithubUrl] = useState('')
   const [elapsedSeconds, setElapsedSeconds] = useState(null)
 
   async function handleSubmit() {
-    if (!websiteUrl.trim() && !githubUrl.trim()) {
-      setValidationError('At least one URL is required.')
+    const activeUrl = inputMode === 'website' ? websiteUrl.trim() : githubUrl.trim()
+
+    if (!activeUrl) {
+      setValidationError('A URL is required.')
       return
     }
 
@@ -27,7 +30,10 @@ export default function App() {
     const startedAt = performance.now()
 
     try {
-      const data = await analyzeProduct({ websiteUrl: websiteUrl.trim(), githubUrl: githubUrl.trim() })
+      const data = await analyzeProduct({
+        websiteUrl: inputMode === 'website' ? activeUrl : '',
+        githubUrl: inputMode === 'github' ? activeUrl : '',
+      })
       setElapsedSeconds(Math.round((performance.now() - startedAt) / 1000))
       setResults(data)
       setAppState('done')
@@ -42,6 +48,7 @@ export default function App() {
     setResults(null)
     setErrorMsg('')
     setValidationError('')
+    setInputMode('website')
     setWebsiteUrl('')
     setGithubUrl('')
     setElapsedSeconds(null)
@@ -56,6 +63,8 @@ export default function App() {
 
         {(appState === 'idle' || appState === 'error') && (
           <LandingView
+            inputMode={inputMode}
+            onModeChange={setInputMode}
             websiteUrl={websiteUrl}
             githubUrl={githubUrl}
             onWebsiteChange={setWebsiteUrl}

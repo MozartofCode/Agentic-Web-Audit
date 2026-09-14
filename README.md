@@ -80,7 +80,8 @@ build" scope guard for the MVP. Read it before making non-trivial changes.
 ## Contributing
 
 Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for setup details, coding
-standards, and how to submit a change.
+standards, and how to submit a change. Participation is governed by the
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Scope
 

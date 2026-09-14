@@ -1,7 +1,7 @@
 # Contributing to AgentReady
 
 Thanks for considering a contribution. This is a small MVP, so the process is intentionally
-lightweight.
+lightweight. Participation is governed by our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Before you start
 

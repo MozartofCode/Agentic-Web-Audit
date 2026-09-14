@@ -66,7 +66,7 @@ agentready/
 | LLM | Groq API — `openai/gpt-oss-120b` | Temperature always `0.1` for structured output |
 | GitHub data | GitHub REST API (unauthenticated) | Public repos only |
 | Syntax highlighting | `react-syntax-highlighter` | Custom theme in UI.md |
-| Deployment | Vercel (frontend), Railway (backend) | |
+| Deployment | Vercel (frontend), Render (backend) | Railway dropped its free tier; Render's free Web Service is the closest zero-cost equivalent (sleeps after 15 min idle) |
 
 ---
 

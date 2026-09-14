@@ -16,7 +16,7 @@ export default function Header({ showNewAnalysis, onNewAnalysis }) {
 
         {!showNewAnalysis && (
           <a
-            href="https://github.com"
+            href="https://github.com/MozartofCode/Agentic-Web-Audit"
             target="_blank"
             rel="noreferrer"
             className="hidden font-ui text-[13px] text-text-muted transition-colors duration-100 hover:text-text-secondary sm:inline-block"

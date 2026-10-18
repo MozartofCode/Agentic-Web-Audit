@@ -36,17 +36,13 @@ async def analyze_product(website_data: dict, github_data: dict) -> ProductAnaly
             ],
             temperature=TEMPERATURE,
             max_tokens=MAX_TOKENS,
+            response_format={"type": "json_object"},
         )
     except Exception as e:
         logger.error("Groq API call failed: %s", str(e))
         raise HTTPException(status_code=500, detail="AI analysis failed. Please try again.")
 
-    raw = response.choices[0].message.content.strip()
-
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
+    raw = (response.choices[0].message.content or "").strip()
 
     try:
         data = json.loads(raw)

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # must run before importing llm_analyzer, which reads GROQ_API_KEY at import time
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from artifact_generator import compute_audit_score, generate_artifacts
@@ -16,6 +16,7 @@ from crawler import crawl_website
 from github_fetcher import fetch_github_repo
 from llm_analyzer import analyze_product
 from models import AnalyzeRequest, AnalyzeResponse
+from safety import enforce_rate_limit
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,7 +38,9 @@ async def health() -> dict:
     return {"status": "ok"}
 
 
-@app.post("/analyze", response_model=AnalyzeResponse)
+@app.post(
+    "/analyze", response_model=AnalyzeResponse, dependencies=[Depends(enforce_rate_limit)]
+)
 async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
     """Crawl the given website/repo, analyze with Groq, and generate all four artifacts."""
     website_url = str(request.website_url) if request.website_url else None
@@ -57,8 +60,11 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
 
     analysis = await analyze_product(website_data, github_data)
 
-    artifacts = generate_artifacts(analysis, website_url)
-    audit_score = compute_audit_score(analysis)
+    has_llms_txt = bool(website_data.get("has_llms_txt") or github_data.get("has_llms_txt"))
+    artifacts = generate_artifacts(
+        analysis, website_url, has_llms_txt, website_data.get("blocked_ai_bots", [])
+    )
+    audit_score = compute_audit_score(analysis, has_llms_txt)
 
     return AnalyzeResponse(
         product_name=analysis.product_name,

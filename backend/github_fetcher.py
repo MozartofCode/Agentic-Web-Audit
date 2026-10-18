@@ -65,6 +65,7 @@ async def fetch_github_repo(github_url: str) -> dict:
         "readme": readme_text[:README_CHARS],
         "file_tree": file_tree[:FILE_TREE_CAP],
         "source_files": source_files,
+        "has_llms_txt": any(path.rsplit("/", 1)[-1] == "llms.txt" for path in file_tree),
     }
 
 

@@ -5,6 +5,13 @@ and/or a public GitHub repo URL, analyzes the product using AI, and generates fo
 agent-readiness artifacts: `llms.txt`, an audit report, an MCP server scaffold, and an
 OpenAPI spec draft.
 
+**Direction (Oct 2026, roadmap in progress):** reposition for *any* website owner as
+"See your website the way ChatGPT, Claude and Perplexity see it" — a measured AI-visibility
+and agent-usability score with evidence and copy-paste fixes. The API/MCP/OpenAPI artifacts
+become a developer track shown when relevant. Rule of thumb: anything that can be measured
+(robots.txt, llms.txt, JSON-LD, meta tags…) is checked deterministically in code; the LLM is
+only for qualitative judgment, never for a pass/fail we can measure.
+
 Read this file before doing anything. It is the source of truth for how this project is built.
 
 ---
@@ -161,12 +168,27 @@ Error (400):
 
 ---
 
+## Abuse Protection (public endpoint)
+
+- Every outbound fetch of a user-supplied URL must go through `safety.assert_public_url` and
+  use `event_hooks={"request": [check_outbound_request]}` so redirects are re-checked (SSRF).
+- `POST /analyze` is rate-limited per IP via the `enforce_rate_limit` dependency
+  (`RATE_LIMIT_PER_HOUR`, default 10).
+
+## Tests
+
+`cd backend && pip install -r requirements-dev.txt && pytest`. Tests must not import
+`llm_analyzer` (it builds a Groq client at import time) or hit the network.
+
+---
+
 ## Environment Variables
 
 ### Backend (`.env` in `backend/`)
 ```
 GROQ_API_KEY=gsk_...
 FRONTEND_URL=http://localhost:5173
+RATE_LIMIT_PER_HOUR=10   # optional
 ```
 
 ### Frontend (`.env` in `frontend/`)
@@ -279,12 +301,12 @@ app.add_middleware(
 If anyone (including me) suggests adding these, say no and reference this list:
 
 - ❌ User authentication or accounts
-- ❌ Database or persistence of any kind
+- ❌ Database or persistence beyond a single reports store (scan results for permalinks,
+  re-scan deltas, badges and caching — no user data, no accounts)
 - ❌ Private GitHub repo support
 - ❌ JavaScript SPA crawling (Playwright/Puppeteer)
 - ❌ Multiple LLM calls per analysis
 - ❌ Streaming responses
-- ❌ Sharing/permalink features
 - ❌ Paid tiers or billing
 - ❌ Email capture or newsletters
 - ❌ Any analytics or tracking scripts

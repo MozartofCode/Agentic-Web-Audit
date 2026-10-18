@@ -1,6 +1,6 @@
 """Pydantic models for all request, response, and internal data shapes."""
 
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, HttpUrl, model_validator
 
@@ -71,10 +71,62 @@ class Artifacts(BaseModel):
     openapi_yaml: str
 
 
+CheckStatus = Literal["pass", "warn", "fail", "na"]
+
+
+class CheckResult(BaseModel):
+    """One measured audit check, with the evidence behind it and how to fix it."""
+
+    id: str
+    category: str
+    title: str
+    status: CheckStatus
+    weight: int
+    evidence: str
+    why: str
+    fix: str = ""
+    fix_language: str = "text"
+
+
+class CategoryScore(BaseModel):
+    """Sub-score for one audit category. `score` is None when every check was n/a."""
+
+    id: str
+    label: str
+    description: str
+    score: Optional[int]
+    passed: int
+    warned: int
+    failed: int
+
+
+class CrawlerAccess(BaseModel):
+    """Whether one AI crawler/agent may read the site, per robots.txt."""
+
+    bot: str
+    owner: str
+    purpose: Literal["training", "search", "user"]
+    status: Literal["allowed", "partial", "blocked"]
+    detail: str
+
+
+class Audit(BaseModel):
+    """The measured agent-readiness audit (deterministic — no LLM judgment in pass/fail)."""
+
+    overall: int
+    grade: str
+    categories: list[CategoryScore]
+    checks: list[CheckResult]
+    crawler_access: list[CrawlerAccess]
+    pages_scanned: list[str]
+    critical_failures: list[str] = []  # titles of failed critical checks; they cap `overall`
+
+
 class AnalyzeResponse(BaseModel):
-    """Response body for POST /analyze."""
+    """Response body for POST /analyze. `audit_score` is the legacy 6-check rubric."""
 
     product_name: str
     product_summary: str
     artifacts: Artifacts
     audit_score: AuditScore
+    audit: Audit

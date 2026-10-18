@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 
 const STAGES = [
-  { message: 'Crawling website...', duration: 3000, progressTo: 20 },
-  { message: 'Reading GitHub repo...', duration: 3000, progressTo: 45 },
-  { message: 'Analyzing with AI...', duration: 6000, progressTo: 80 },
-  { message: 'Generating artifacts...', duration: 3000, progressTo: 100 },
+  { message: 'Reading robots.txt, sitemap and llms.txt...', duration: 2000, progressTo: 20 },
+  { message: 'Testing access as an AI crawler...', duration: 2000, progressTo: 35 },
+  { message: 'Fetching key pages...', duration: 3000, progressTo: 55 },
+  { message: 'Running 37 checks...', duration: 2000, progressTo: 70 },
+  { message: 'Asking AI how it understands you...', duration: 5000, progressTo: 90 },
+  { message: 'Generating your fix-it pack...', duration: 3000, progressTo: 100 },
 ]
 
 function domainOf(url) {

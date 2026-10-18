@@ -33,7 +33,10 @@ agentready/
 ├── UI.md                      ← full UI/UX design spec (READ THIS for any frontend work)
 ├── backend/
 │   ├── main.py
-│   ├── crawler.py
+│   ├── crawler.py             ← HTML/robots/llms.txt parsing helpers
+│   ├── site_fetcher.py        ← SiteContext: one SSRF-safe fetch of everything checks need
+│   ├── checks/                ← measured audit: one module per category, @check registry
+│   ├── safety.py
 │   ├── github_fetcher.py
 │   ├── llm_analyzer.py
 │   ├── artifact_generator.py
@@ -49,7 +52,9 @@ agentready/
     │   │   ├── LoadingView.jsx
     │   │   ├── ResultsView.jsx
     │   │   ├── InputForm.jsx
-    │   │   ├── AuditScoreCard.jsx
+    │   │   ├── ScoreHero.jsx / CategoryRings.jsx
+    │   │   ├── CrawlerMatrix.jsx
+    │   │   ├── CheckList.jsx / CheckItem.jsx / CopyButton.jsx
     │   │   ├── ArtifactSection.jsx
     │   │   └── ErrorBanner.jsx
     │   ├── api.js
@@ -157,9 +162,27 @@ Response (200):
       "has_api_key_auth": true,
       "has_webhook_support": false
     }
+  },
+  "audit": {                      // measured audit — what the results UI renders
+    "overall": 64, "grade": "D",
+    "critical_failures": [],      // failed critical checks cap overall at 49
+    "categories": [{ "id": "crawler", "label": "...", "description": "...",
+                     "score": 82, "passed": 4, "warned": 1, "failed": 0 }],  // null = all n/a
+    "checks": [{ "id": "llms_txt", "category": "agent", "title": "...",
+                 "status": "pass|warn|fail|na", "weight": 8, "evidence": "...",
+                 "why": "...", "fix": "...", "fix_language": "markdown" }],
+    "crawler_access": [{ "bot": "GPTBot", "owner": "OpenAI",
+                         "purpose": "training|search|user",
+                         "status": "allowed|partial|blocked", "detail": "..." }],
+    "pages_scanned": ["https://example.com/", "https://example.com/pricing"]
   }
 }
 ```
+
+`audit_score` is the legacy 6-check rubric (mostly LLM-judged); new UI work uses `audit`.
+To add a check: write a function in the right `backend/checks/<category>.py` decorated with
+`@check(...)`, returning `Outcome(status, evidence, fix)`, and add a fixture case to
+`backend/tests/test_checks.py` (a test fails if any check has no case).
 
 Error (400):
 ```json

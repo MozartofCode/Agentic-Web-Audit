@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { downloadFile } from '../download'
 import { agentReadyTheme } from '../syntaxTheme'
+import CopyButton from './CopyButton'
 
 const TABS = [
   { key: 'llms_txt', label: 'llms.txt', filename: 'llms.txt', language: 'markdown' },
@@ -12,24 +13,12 @@ const TABS = [
 
 export default function ArtifactSection({ artifacts }) {
   const [activeKey, setActiveKey] = useState(TABS[0].key)
-  const [copied, setCopied] = useState(false)
 
   const activeTab = TABS.find((t) => t.key === activeKey)
   const content = artifacts[activeKey] || ''
 
   function handleTabChange(key) {
     setActiveKey(key)
-    setCopied(false)
-  }
-
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(content)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // Clipboard permissions denied — nothing to fall back to for MVP.
-    }
   }
 
   function handleDownload() {
@@ -66,13 +55,7 @@ export default function ArtifactSection({ artifacts }) {
       <div className="flex h-11 items-center justify-between border-b border-border-subtle bg-bg-surface px-4">
         <span className="font-code text-[13px] text-text-secondary">{activeTab.filename}</span>
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="h-8 rounded border border-border-default bg-transparent px-3 font-ui text-[13px] font-medium text-text-secondary transition-colors duration-100 hover:border-border-strong hover:bg-bg-elevated focus:outline-none focus:ring-2 focus:ring-accent/30"
-          >
-            {copied ? '✓ Copied' : 'Copy'}
-          </button>
+          <CopyButton key={activeKey} text={content} />
           <button
             type="button"
             onClick={handleDownload}

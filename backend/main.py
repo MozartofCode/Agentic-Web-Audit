@@ -12,11 +12,12 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from artifact_generator import compute_audit_score, generate_artifacts
-from crawler import crawl_website
+from checks import run_audit
 from github_fetcher import fetch_github_repo
 from llm_analyzer import analyze_product
 from models import AnalyzeRequest, AnalyzeResponse
 from safety import enforce_rate_limit
+from site_fetcher import SiteContext, fetch_site, website_data_from_context
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,19 +47,24 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
     website_url = str(request.website_url) if request.website_url else None
     github_url = str(request.github_url) if request.github_url else None
 
-    website_data: dict = {}
+    ctx = SiteContext()
     github_data: dict = {}
 
     if website_url and github_url:
-        website_data, github_data = await asyncio.gather(
-            crawl_website(website_url), fetch_github_repo(github_url)
+        ctx, github_data = await asyncio.gather(
+            fetch_site(website_url), fetch_github_repo(github_url)
         )
     elif website_url:
-        website_data = await crawl_website(website_url)
+        ctx = await fetch_site(website_url)
     elif github_url:
         github_data = await fetch_github_repo(github_url)
 
+    website_data = website_data_from_context(ctx) if ctx.has_website else {}
     analysis = await analyze_product(website_data, github_data)
+
+    ctx.github = github_data
+    ctx.llm_says_api = analysis.product_category.strip().upper() == "API"
+    audit = run_audit(ctx)
 
     has_llms_txt = bool(website_data.get("has_llms_txt") or github_data.get("has_llms_txt"))
     artifacts = generate_artifacts(
@@ -71,4 +77,5 @@ async def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
         product_summary=analysis.product_description,
         artifacts=artifacts,
         audit_score=audit_score,
+        audit=audit,
     )

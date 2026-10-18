@@ -18,20 +18,21 @@ function domainOf(url) {
   }
 }
 
-export default function LoadingView({ websiteUrl, githubUrl }) {
+/** `message` replaces the scan stages (e.g. while fetching a saved report). */
+export default function LoadingView({ urls = [], message = '' }) {
   const [stageIndex, setStageIndex] = useState(0)
 
   useEffect(() => {
-    if (stageIndex >= STAGES.length - 1) return undefined
+    if (message || stageIndex >= STAGES.length - 1) return undefined
 
     const timer = setTimeout(() => {
       setStageIndex((i) => Math.min(i + 1, STAGES.length - 1))
     }, STAGES[stageIndex].duration)
 
     return () => clearTimeout(timer)
-  }, [stageIndex])
+  }, [stageIndex, message])
 
-  const domains = [domainOf(websiteUrl), domainOf(githubUrl)].filter(Boolean)
+  const domains = urls.map((u) => domainOf(u.trim())).filter(Boolean)
   const stage = STAGES[stageIndex]
   const progress = stage.progressTo
 
@@ -43,17 +44,19 @@ export default function LoadingView({ websiteUrl, githubUrl }) {
     >
       <div className="pulse-orb" aria-hidden="true" />
 
-      <p key={stageIndex} className="stage-message fade-in mt-8 font-code text-[14px] text-text-secondary">
-        {stage.message}
+      <p key={message || stageIndex} className="stage-message fade-in mt-8 font-code text-[14px] text-text-secondary">
+        {message || stage.message}
         <span className="blink-cursor text-accent">_</span>
       </p>
 
-      <div className="mt-8 h-0.5 w-[320px] max-w-[90%] rounded-full bg-border-subtle">
-        <div
-          className="h-full rounded-full bg-accent transition-[width] duration-[600ms] ease-out"
-          style={{ width: `${progress}%`, boxShadow: '0 0 8px 1px var(--color-accent-glow)' }}
-        />
-      </div>
+      {!message && (
+        <div className="mt-8 h-0.5 w-[320px] max-w-[90%] rounded-full bg-border-subtle">
+          <div
+            className="h-full rounded-full bg-accent transition-[width] duration-[600ms] ease-out"
+            style={{ width: `${progress}%`, boxShadow: '0 0 8px 1px var(--color-accent-glow)' }}
+          />
+        </div>
+      )}
 
       {domains.length > 0 && (
         <p className="mt-6 font-code text-[12px] text-text-muted">{domains.join(' · ')}</p>

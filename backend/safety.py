@@ -70,17 +70,17 @@ class RateLimiter:
         self.window_seconds = window_seconds
         self._hits: dict[str, deque[float]] = defaultdict(deque)
 
-    def allow(self, key: str, now: float | None = None) -> bool:
-        """Record a hit for `key` and return False if it exceeds the limit."""
+    def allow(self, key: str, now: float | None = None, cost: int = 1) -> bool:
+        """Record `cost` hits for `key` and return False if that would exceed the limit."""
         now = time.monotonic() if now is None else now
         if len(self._hits) > MAX_TRACKED_CLIENTS:
             self._prune(now)
         hits = self._hits[key]
         while hits and now - hits[0] >= self.window_seconds:
             hits.popleft()
-        if len(hits) >= self.limit:
+        if len(hits) + cost > self.limit:
             return False
-        hits.append(now)
+        hits.extend([now] * cost)
         return True
 
     def _prune(self, now: float) -> None:
@@ -106,11 +106,20 @@ def client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-async def enforce_rate_limit(request: Request) -> None:
-    """FastAPI dependency: 429 once a client exceeds RATE_LIMIT_PER_HOUR scans."""
-    if not _limiter.allow(client_ip(request)):
+def _enforce(request: Request, cost: int) -> None:
+    if not _limiter.allow(client_ip(request), cost=cost):
         raise HTTPException(
             status_code=429,
             detail=f"You've hit the limit of {RATE_LIMIT_PER_HOUR} scans per hour. "
             "Please try again later.",
         )
+
+
+async def enforce_rate_limit(request: Request) -> None:
+    """FastAPI dependency: 429 once a client exceeds RATE_LIMIT_PER_HOUR scans."""
+    _enforce(request, cost=1)
+
+
+async def enforce_compare_rate_limit(request: Request) -> None:
+    """FastAPI dependency for POST /compare, which runs two scans and so costs two."""
+    _enforce(request, cost=2)

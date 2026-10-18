@@ -32,7 +32,13 @@ agentready/
 ├── spec.md                    ← full product spec (READ THIS)
 ├── UI.md                      ← full UI/UX design spec (READ THIS for any frontend work)
 ├── backend/
-│   ├── main.py
+│   ├── main.py                ← app, CORS, reports-store lifespan
+│   ├── reports.py             ← routes: /analyze, /compare, /reports, /badge, /og, /share
+│   ├── scan.py                ← the scan pipeline (crawl → checks → one LLM call → fix pack)
+│   ├── store.py               ← reports store: Postgres (asyncpg) / in-memory / null
+│   ├── delta.py               ← re-scan delta vs the previous report for a domain
+│   ├── share_images.py        ← README badge SVG + 1200×630 OG card PNG (Pillow)
+│   ├── migrations/            ← SQL for the reports table (apply by hand / Supabase)
 │   ├── crawler.py             ← HTML/robots/llms.txt parsing helpers
 │   ├── site_fetcher.py        ← SiteContext: one SSRF-safe fetch of everything checks need
 │   ├── checks/                ← measured audit: one module per category, @check registry
@@ -60,9 +66,14 @@ agentready/
     │   │   ├── CrawlerMatrix.jsx
     │   │   ├── CheckList.jsx / CheckItem.jsx / CopyButton.jsx
     │   │   ├── ArtifactSection.jsx
+    │   │   ├── ShareBar.jsx / ReportStatus.jsx   ← permalink, badge, re-scan, delta
+    │   │   ├── CompareForm.jsx / CompareView.jsx
     │   │   └── ErrorBanner.jsx
     │   ├── api.js
+    │   ├── routes.js              ← pathname router: /, /r/:id, /compare[/:a/:b]
     │   └── main.jsx
+    ├── middleware.js              ← Vercel: link-preview bots on /r/:id get /share/:id
+    ├── vercel.json                ← SPA rewrite
     ├── index.html
     ├── tailwind.config.js
     └── package.json
@@ -139,10 +150,14 @@ Request:
 ```json
 {
   "website_url": "https://example.com",   // nullable
-  "github_url": "https://github.com/..."  // nullable
-  // At least one must be non-null
+  "github_url": "https://github.com/...", // nullable
+  "refresh": false                        // true = skip the 24h cache (Re-scan)
+  // At least one URL must be non-null
 }
 ```
+
+A scan of the same input (normalized URL) within 24h returns the saved report with
+`cached: true` — no crawl, no LLM call. Fresh scans are saved when a store is configured.
 
 Response (200):
 ```json
@@ -196,6 +211,16 @@ Response (200):
                 "label": "...", "filename": "...", "language": "markdown|diff|html|...",
                 "content": "...", "description": "...", "how_to": ["step"],
                 "developer": false }]   // OpenAPI/MCP only on the developer track
+  },
+  "website_url": "https://example.com/",   // the scanned input (nullable)
+  "github_url": null,
+  "report_id": "qJ7Vh7JJ",        // null when no store is configured (DATABASE_URL unset)
+  "created_at": "2026-10-18T16:02:11Z",
+  "cached": false,                // true for a saved report (cache hit or GET /reports/{id})
+  "delta": {                      // vs the previous report for the same domain; nullable
+    "previous_report_id": "aB3dE5fG", "previous_overall": 58,
+    "previous_created_at": "...", "points": 6,
+    "now_passing": ["llms.txt is published"], "regressed": []
   }
 }
 ```
@@ -212,6 +237,30 @@ Error (400):
 { "detail": "Human-readable error message" }
 ```
 
+### Other routes
+
+| Route | Returns |
+|---|---|
+| `GET /reports/{id}` | the saved report (same shape as `/analyze`, `cached: true`); 404 unknown, 410 unreadable old format |
+| `POST /compare` | `{"website_urls": [a, b]}` → `{"reports": [A, B]}`. Both scans run in parallel (one LLM call each, cache applies); counts as 2 against the rate limit |
+| `GET /badge/{domain}.svg` | "AI-Ready · NN" badge from the domain's latest report (`www.` ignored); "not scanned" if none |
+| `GET /og/{id}.png` | 1200×630 social card for a report |
+| `GET /share/{id}` | HTML with Open Graph/Twitter tags for link-preview bots; redirects people to `FRONTEND_URL/r/{id}` |
+
+The frontend permalinks are `/r/:id` and `/compare/:idA/:idB`. Vercel serves the SPA for
+every path (`vercel.json`); `frontend/middleware.js` sends link-preview bots on `/r/:id` to
+`/share/:id` so shared links unfurl with the report's OG image.
+
+### Reports store
+
+`store.py` picks the backend from `DATABASE_URL`: unset → `NullReportStore` (nothing saved,
+no permalinks/badges/deltas, scans still work); `memory://` → in-process store for local dev;
+anything else → Postgres via asyncpg. The table is `backend/migrations/001_reports.sql`
+(`id, url, domain, created_at, overall, payload jsonb`, RLS on with no policies). On Supabase
+use the **pooler** connection string (Render has no IPv6); the pool runs with
+`statement_cache_size=0` so the transaction pooler works. Database errors never fail a scan:
+reads count as misses, a failed save returns the report without a `report_id`.
+
 ---
 
 ## Abuse Protection (public endpoint)
@@ -219,12 +268,15 @@ Error (400):
 - Every outbound fetch of a user-supplied URL must go through `safety.assert_public_url` and
   use `event_hooks={"request": [check_outbound_request]}` so redirects are re-checked (SSRF).
 - `POST /analyze` is rate-limited per IP via the `enforce_rate_limit` dependency
-  (`RATE_LIMIT_PER_HOUR`, default 10).
+  (`RATE_LIMIT_PER_HOUR`, default 10); `POST /compare` uses `enforce_compare_rate_limit`,
+  which costs 2.
 
 ## Tests
 
 `cd backend && pip install -r requirements-dev.txt && pytest`. Tests must not import
-`llm_analyzer` (it builds a Groq client at import time) or hit the network.
+`llm_analyzer` (it builds a Groq client at import time) or hit the network. Route tests
+override the `get_scanner` / `get_store` dependencies in `reports.py` (see
+`tests/test_reports.py`); `main` imports the pipeline lazily so this works.
 
 ---
 
@@ -235,12 +287,16 @@ Error (400):
 GROQ_API_KEY=gsk_...
 FRONTEND_URL=http://localhost:5173
 RATE_LIMIT_PER_HOUR=10   # optional
+DATABASE_URL=            # optional: Postgres URL (Supabase pooler), or memory:// for local dev
+PUBLIC_API_URL=          # optional: this API's public URL, for absolute og:image links
 ```
 
 ### Frontend (`.env` in `frontend/`)
 ```
 VITE_API_URL=http://localhost:8000
 ```
+
+On Vercel, `VITE_API_URL` is also read at runtime by `middleware.js`.
 
 **Rules:**
 - Never commit `.env` files. Always use `.env.example` with placeholder values.
@@ -266,6 +322,11 @@ State transitions:
 idle  →  loading  →  done
                   →  error  →  idle (user edits URL and resubmits)
 ```
+
+Alongside it, `route` (from `routes.js`, synced with `history.pushState`/`popstate`) picks
+the view: `/` landing, `/r/:id` a saved report (loaded via `GET /reports/{id}`), `/compare`
+the compare form and `/compare/:a/:b` a saved comparison. A finished scan pushes its
+`/r/:id`, so the address bar is always the shareable link.
 
 There is no back button in the loading state. If the user wants to cancel, they must
 wait for the result and then click "New Analysis" in the header.

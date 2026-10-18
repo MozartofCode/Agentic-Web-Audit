@@ -2,7 +2,9 @@ import AIPreviewCard from './AIPreviewCard'
 import ArtifactSection from './ArtifactSection'
 import CheckList from './CheckList'
 import CrawlerMatrix from './CrawlerMatrix'
+import ReportStatus from './ReportStatus'
 import ScoreHero from './ScoreHero'
+import ShareBar from './ShareBar'
 import TopFixes from './TopFixes'
 
 function domainOf(url) {
@@ -13,7 +15,7 @@ function domainOf(url) {
   }
 }
 
-export default function ResultsView({ results }) {
+export default function ResultsView({ results, onRescan, onCompare, onOpenReport }) {
   const { audit, fix_pack: fixPack } = results
   const scanned = audit.pages_scanned
 
@@ -29,7 +31,15 @@ export default function ResultsView({ results }) {
         </p>
       )}
 
-      <div className="rounded border border-border-subtle bg-bg-surface p-6">
+      <ShareBar results={results} onRescan={onRescan} onCompare={onCompare} />
+
+      {(results.delta || results.cached) && (
+        <div className="mt-3">
+          <ReportStatus results={results} onOpenReport={onOpenReport} />
+        </div>
+      )}
+
+      <div className="mt-6 rounded border border-border-subtle bg-bg-surface p-6">
         <h1 className="font-ui text-[18px] font-semibold tracking-[-0.02em] text-text-primary">
           {results.product_name}
         </h1>

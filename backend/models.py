@@ -1,21 +1,9 @@
 """Pydantic models for all request, response, and internal data shapes."""
 
+from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, HttpUrl, field_validator, model_validator
-
-
-class AnalyzeRequest(BaseModel):
-    """Request body for POST /analyze."""
-
-    website_url: Optional[HttpUrl] = None
-    github_url: Optional[HttpUrl] = None
-
-    @model_validator(mode="after")
-    def at_least_one_url(self) -> "AnalyzeRequest":
-        if not self.website_url and not self.github_url:
-            raise ValueError("At least one of website_url or github_url is required")
-        return self
+from pydantic import BaseModel, Field, HttpUrl, field_validator, model_validator
 
 
 class CoreAction(BaseModel):
@@ -234,8 +222,23 @@ class FixPack(BaseModel):
     files: list[FixPackFile]
 
 
+class ReportDelta(BaseModel):
+    """How a report changed since the previous report for the same domain."""
+
+    previous_report_id: str
+    previous_overall: int
+    previous_created_at: datetime
+    points: int  # current overall minus previous overall
+    now_passing: list[str] = []  # titles of checks that were warn/fail and now pass
+    regressed: list[str] = []  # titles of checks that passed before and now don't
+
+
+# Fields describing a saved report rather than the scan itself; never stored in the payload.
+REPORT_META_FIELDS = {"report_id", "created_at", "cached", "delta"}
+
+
 class AnalyzeResponse(BaseModel):
-    """Response body for POST /analyze. `audit_score` is the legacy 6-check rubric."""
+    """Response body for POST /analyze and GET /reports/{id}. `audit_score` is legacy."""
 
     product_name: str
     product_summary: str
@@ -244,3 +247,35 @@ class AnalyzeResponse(BaseModel):
     audit: Audit
     ai_preview: AIPreview
     fix_pack: FixPack
+    website_url: Optional[str] = None
+    github_url: Optional[str] = None
+    report_id: Optional[str] = None  # None when this server doesn't save reports
+    created_at: Optional[datetime] = None
+    cached: bool = False  # True when this is a saved scan of the same URL from the last 24h
+    delta: Optional[ReportDelta] = None
+
+
+class AnalyzeRequest(BaseModel):
+    """Request body for POST /analyze. `refresh` skips the 24h cache (the Re-scan button)."""
+
+    website_url: Optional[HttpUrl] = None
+    github_url: Optional[HttpUrl] = None
+    refresh: bool = False
+
+    @model_validator(mode="after")
+    def at_least_one_url(self) -> "AnalyzeRequest":
+        if not self.website_url and not self.github_url:
+            raise ValueError("At least one of website_url or github_url is required")
+        return self
+
+
+class CompareRequest(BaseModel):
+    """Request body for POST /compare: exactly two websites, scanned side by side."""
+
+    website_urls: list[HttpUrl] = Field(min_length=2, max_length=2)
+
+
+class CompareResponse(BaseModel):
+    """Response body for POST /compare: one full report per site, in request order."""
+
+    reports: list[AnalyzeResponse]

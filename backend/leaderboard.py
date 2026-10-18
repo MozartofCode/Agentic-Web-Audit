@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import json
 import logging
 import os
 import re
@@ -194,7 +193,7 @@ async def build_snapshot(
             except HTTPException as e:
                 logger.warning("%-20s failed: %s", domain, e.detail)
                 return LeaderboardFailure(domain=domain, error=failure_reason(str(e.detail)))
-            except Exception as e:  # one bad site must not abort the whole batch
+            except Exception:  # one bad site must not abort the whole batch
                 logger.exception("%-20s crashed", domain)
                 return LeaderboardFailure(domain=domain, error=failure_reason(""))
 

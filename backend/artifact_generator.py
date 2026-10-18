@@ -101,24 +101,22 @@ def _generate_audit_md(
         icon = "✅" if passed else "❌"
         return f"- {icon} **{label}** ({points} pts)"
 
+    labels = {
+        "has_api": "Has a public API",
+        "has_openapi_spec": "Has an OpenAPI/Swagger spec",
+        "has_llms_txt": "Has llms.txt",
+        "has_structured_docs": "Has structured docs",
+        "has_api_key_auth": "Has API key / token auth",
+        "has_webhook_support": "Has webhook support",
+    }
     checks = [
-        check_line("Has a public API", breakdown.has_api, SCORE_POINTS["has_api"]),
-        check_line(
-            "Has an OpenAPI/Swagger spec", breakdown.has_openapi_spec, SCORE_POINTS["has_openapi_spec"]
-        ),
-        check_line("Has llms.txt", breakdown.has_llms_txt, SCORE_POINTS["has_llms_txt"]),
-        check_line(
-            "Has structured docs", breakdown.has_structured_docs, SCORE_POINTS["has_structured_docs"]
-        ),
-        check_line(
-            "Has API key / token auth", breakdown.has_api_key_auth, SCORE_POINTS["has_api_key_auth"]
-        ),
-        check_line(
-            "Has webhook support", breakdown.has_webhook_support, SCORE_POINTS["has_webhook_support"]
-        ),
+        check_line(label, getattr(breakdown, key), SCORE_POINTS[key])
+        for key, label in labels.items()
     ]
 
-    working = [c for c in checks if "✅" in c] or ["- Nothing scored yet — this product is early-stage for agents."]
+    working = [c for c in checks if "✅" in c] or [
+        "- Nothing scored yet — this product is early-stage for agents."
+    ]
     missing = analysis.missing_agent_features or ["No specific gaps were identified."]
     recommendations = analysis.recommendations or ["No specific recommendations were generated."]
     priority = recommendations[:3]

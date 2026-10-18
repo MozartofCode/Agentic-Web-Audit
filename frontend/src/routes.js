@@ -35,3 +35,21 @@ export function siteDomain(url) {
     return url
   }
 }
+
+/**
+ * Turn what someone typed ("python.org", "www.x.com/page", "https://x.com") into a full URL.
+ * Returns { url } or { error } with a message to show under the field.
+ */
+export function normalizeUrl(input) {
+  const raw = (input || '').trim()
+  if (!raw) return { error: 'Enter a website address.' }
+  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`
+  try {
+    const url = new URL(withScheme)
+    if (!['http:', 'https:'].includes(url.protocol)) throw new Error('scheme')
+    if (!url.hostname.includes('.') && url.hostname !== 'localhost') throw new Error('host')
+    return { url: url.href }
+  } catch {
+    return { error: `"${raw}" doesn't look like a website address. Try something like example.com.` }
+  }
+}

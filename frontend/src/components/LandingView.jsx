@@ -1,6 +1,8 @@
 import ErrorBanner from './ErrorBanner'
 import InputForm from './InputForm'
 
+const EXAMPLES = ['python.org', 'stripe.com', 'wikipedia.org']
+
 export default function LandingView({
   inputMode,
   onModeChange,
@@ -11,6 +13,7 @@ export default function LandingView({
   onSubmit,
   onCompare,
   onLeaderboard,
+  onExample,
   loading,
   validationError,
   errorMsg,
@@ -21,15 +24,13 @@ export default function LandingView({
 
       <div className="relative z-1 mx-auto w-full max-w-[620px] text-center">
         <h1 className="mx-auto max-w-[16ch] text-display font-bold leading-[1.05] tracking-[-0.04em] text-text-primary">
-          Make your product agent ready.
+          See your site the way AI sees it.
         </h1>
 
-        <p className="mx-auto mt-6 max-w-[50ch] text-body leading-[1.6] text-text-secondary">
-          Drop in a website or GitHub repo and we&apos;ll check how ready it is for agents — then
-          generate the files it&apos;s missing, like{' '}
-          <code className="font-code text-[0.85em] text-text-primary">llms.txt</code>, an{' '}
-          <code className="font-code text-[0.85em] text-text-primary">MCP server</code>, and an{' '}
-          <code className="font-code text-[0.85em] text-text-primary">OpenAPI spec</code>.
+        <p className="mx-auto mt-6 max-w-[52ch] text-body leading-[1.6] text-text-secondary">
+          Find out if ChatGPT, Claude and Perplexity can read your website and answer questions
+          about it. You get a score, the evidence behind it, and fixes you can copy and paste.
+          Free, no sign-up.
         </p>
 
         <div className="mt-10">
@@ -45,10 +46,25 @@ export default function LandingView({
             validationError={validationError}
           />
           <ErrorBanner message={errorMsg} />
+          <p className="mt-4 font-ui text-[13px] text-text-muted">
+            Try:{' '}
+            {EXAMPLES.map((example, i) => (
+              <span key={example}>
+                {i > 0 && ' · '}
+                <button
+                  type="button"
+                  onClick={() => onExample(`https://${example}`)}
+                  className="rounded font-code text-text-secondary underline-offset-2 transition-colors duration-100 hover:text-accent hover:underline focus:outline-none focus:ring-2 focus:ring-accent/30"
+                >
+                  {example}
+                </button>
+              </span>
+            ))}
+          </p>
           <button
             type="button"
             onClick={onCompare}
-            className="mt-6 rounded px-2 py-1 font-ui text-[13px] text-text-muted transition-colors duration-100 hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent/30"
+            className="mt-4 rounded px-2 py-1 font-ui text-[13px] text-text-muted transition-colors duration-100 hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent/30"
           >
             Or compare two sites side by side →
           </button>

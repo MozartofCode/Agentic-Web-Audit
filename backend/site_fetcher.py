@@ -26,6 +26,7 @@ from safety import assert_public_url, check_outbound_request
 logger = logging.getLogger(__name__)
 
 FETCH_TIMEOUT = 8.0
+BLOCKED_STATUSES = (401, 403, 429, 503)
 KEY_PAGES_BUDGET_SECONDS = 12.0
 MAX_CONCURRENT_FETCHES = 4
 MAX_KEY_PAGES = 8
@@ -240,16 +241,25 @@ async def _await_homepage(task: asyncio.Future, url: str) -> FetchedPage:
     except httpx.TimeoutException:
         raise HTTPException(
             status_code=400,
-            detail=f"Timed out connecting to {url}. The site may be too slow or blocking crawlers.",
+            detail=f"Timed out connecting to {url}. The site may be slow or blocking automated "
+            "visitors — if so, AI agents can't read it either.",
         )
     except httpx.RequestError:
         raise HTTPException(
-            status_code=400, detail=f"Could not reach {url}. Check the URL and try again."
+            status_code=400,
+            detail=f"Could not reach {url}. Check the address for typos and try again.",
+        )
+    if page.status in BLOCKED_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"The site returned {page.status}: it turns away automated visitors, so AI "
+            "agents most likely can't read it either. Check your firewall or bot-protection "
+            "settings (for example Cloudflare's bot rules).",
         )
     if not page.ok:
         raise HTTPException(
             status_code=400,
-            detail=f"The site returned {page.status}. Try the GitHub URL alone.",
+            detail=f"The site returned {page.status}. Check the address and try again.",
         )
     return page
 

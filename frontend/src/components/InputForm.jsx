@@ -1,6 +1,6 @@
 const MODES = [
-  { key: 'website', label: 'Website', icon: '🌐', placeholder: 'https://yoursite.com' },
-  { key: 'github', label: 'GitHub Repo', icon: '⌥', placeholder: 'https://github.com/org/repo' },
+  { key: 'website', label: 'Website', icon: '🌐', placeholder: 'yoursite.com' },
+  { key: 'github', label: 'GitHub Repo', icon: '⌥', placeholder: 'github.com/org/repo' },
 ]
 
 export default function InputForm({
@@ -35,7 +35,7 @@ export default function InputForm({
     <form onSubmit={handleSubmit} className="mx-auto w-full max-w-[520px]">
       <div
         role="tablist"
-        aria-label="Analyze by"
+        aria-label="What to check"
         className="mx-auto mb-3 inline-flex rounded border border-border-default bg-bg-elevated p-1"
       >
         {MODES.map((mode) => {
@@ -68,7 +68,12 @@ export default function InputForm({
           {activeMode.icon}
         </span>
         <input
-          type="url"
+          type="text"
+          inputMode="url"
+          autoComplete="url"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={activeMode.placeholder}
@@ -87,7 +92,7 @@ export default function InputForm({
         disabled={loading}
         className="group mt-6 flex h-12 w-full items-center justify-center gap-2 rounded bg-accent font-ui text-[15px] font-semibold tracking-[-0.01em] text-bg-base transition-all duration-100 hover:brightness-108 active:brightness-92 disabled:cursor-not-allowed disabled:opacity-40 focus:outline-none focus:ring-2 focus:ring-accent/30"
       >
-        <span>Analyze my product</span>
+        <span>{activeMode.key === 'website' ? 'Check my site' : 'Check my repo'}</span>
         <svg
           aria-hidden="true"
           viewBox="0 0 20 20"

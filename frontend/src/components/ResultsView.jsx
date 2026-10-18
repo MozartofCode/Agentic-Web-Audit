@@ -47,7 +47,7 @@ export default function ResultsView({ results, onRescan, onCompare, onOpenReport
       </div>
 
       <div className="mt-6">
-        <ScoreHero audit={audit} />
+        <ScoreHero audit={audit} repoOnly={!results.website_url} />
       </div>
 
       {audit.top_fixes.length > 0 && (

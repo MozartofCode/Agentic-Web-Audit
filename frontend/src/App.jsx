@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { analyzeProduct, compareSites, getReport } from './api'
-import { LEADERBOARD_PATH, comparePath, parseRoute, reportPath, siteDomain } from './routes'
+import {
+  LEADERBOARD_PATH,
+  comparePath,
+  normalizeUrl,
+  parseRoute,
+  reportPath,
+  siteDomain,
+} from './routes'
 import CompareForm from './components/CompareForm'
 import CompareView from './components/CompareView'
 import Header from './components/Header'
@@ -122,16 +129,22 @@ export default function App() {
   )
 
   function handleSubmit() {
-    const activeUrl = inputMode === 'website' ? websiteUrl.trim() : githubUrl.trim()
-    if (!activeUrl) {
-      setValidationError('A URL is required.')
+    const { url, error } = normalizeUrl(inputMode === 'website' ? websiteUrl : githubUrl)
+    if (error) {
+      setValidationError(error)
       return
     }
     setValidationError('')
     runAnalysis({
-      website: inputMode === 'website' ? activeUrl : '',
-      github: inputMode === 'github' ? activeUrl : '',
+      website: inputMode === 'website' ? url : '',
+      github: inputMode === 'github' ? url : '',
     })
+  }
+
+  function handleExample(url) {
+    setInputMode('website')
+    setValidationError('')
+    runAnalysis({ website: url, github: '' })
   }
 
   function handleRescan() {
@@ -144,11 +157,14 @@ export default function App() {
   }
 
   async function handleCompare() {
-    const [a, b] = compareUrls.map((u) => u.trim())
-    if (!a || !b) {
-      setValidationError('Enter both sites.')
+    const [first, second] = compareUrls.map(normalizeUrl)
+    const problem = first.error || second.error
+    if (problem) {
+      setValidationError(problem)
       return
     }
+    const [a, b] = [first.url, second.url]
+    setCompareUrls([a, b])
     setValidationError('')
     setErrorMsg('')
     setLoadingMessage('')
@@ -237,6 +253,7 @@ export default function App() {
             onSubmit={handleSubmit}
             onCompare={() => navigate(comparePath())}
             onLeaderboard={() => navigate(LEADERBOARD_PATH)}
+            onExample={handleExample}
             loading={false}
             validationError={validationError}
             errorMsg={errorMsg}

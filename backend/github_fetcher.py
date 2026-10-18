@@ -97,7 +97,9 @@ async def _fetch_source_files(
     candidates = [
         path
         for path in file_tree
-        if path.startswith(SOURCE_DIR_PREFIXES) or path in TECH_STACK_FILES or path in SPEC_FILENAMES
+        if path.startswith(SOURCE_DIR_PREFIXES)
+        or path in TECH_STACK_FILES
+        or path in SPEC_FILENAMES
     ][:MAX_SOURCE_FILES]
 
     source_files: dict[str, str] = {}

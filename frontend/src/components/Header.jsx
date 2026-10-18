@@ -11,7 +11,12 @@ export default function Header({ showNewAnalysis, onNewAnalysis, onLeaderboard }
             ← New Analysis
           </button>
         ) : (
-          <span />
+          <a
+            href="/"
+            className="rounded font-ui text-[15px] font-semibold tracking-[-0.02em] text-text-primary focus:outline-none focus:ring-2 focus:ring-accent/30"
+          >
+            AgentReady
+          </a>
         )}
 
         <div className="flex items-center gap-4">

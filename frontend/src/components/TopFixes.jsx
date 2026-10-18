@@ -25,6 +25,10 @@ function FixRow({ fix, rank }) {
                 {EFFORT_LABEL[fix.effort]}
               </span>
               <span className={`font-ui text-[11px] ${meta.text}`}>{meta.label}</span>
+              <span className="font-ui text-[12px] text-accent">
+                <span className="group-open:hidden">Show fix ▾</span>
+                <span className="hidden group-open:inline">Hide fix ▴</span>
+              </span>
             </span>
           </span>
           <span className="shrink-0 text-right">
@@ -58,7 +62,7 @@ export default function TopFixes({ fixes }) {
       </h2>
       <p className="mt-1 font-ui text-small text-text-secondary">
         The most impact for the least effort. Points are the estimated gain if that one check
-        passes.
+        passes. Open a fix to see exactly what to change.
       </p>
       <ol className="mt-4 space-y-2">
         {fixes.map((fix, i) => (

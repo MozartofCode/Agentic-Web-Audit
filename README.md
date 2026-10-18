@@ -5,7 +5,7 @@ that scans a public website (and optionally a public GitHub repo) and tells you 
 assistants and agents can read and use it — with the evidence behind every point and the
 exact fixes to paste in.
 
-- **Measured AI-readiness score** — ~30 deterministic checks across AI crawler access,
+- **Measured AI-readiness score** — 37 deterministic checks across AI crawler access,
   readability without JavaScript, structured data, agent discovery (llms.txt), answerability
   and a developer track. Every check shows what was found, why it matters, and a fix.
 - **How AI sees you** — what an assistant would likely say about your site, what it can't
@@ -22,16 +22,16 @@ exact fixes to paste in.
 
 ## How it works
 
-You give it a website URL, a GitHub repo URL, or both. The backend crawls the page (or pulls
-the README, file tree, and a handful of relevant source files from GitHub), sends that content
-to an LLM in a single call, and gets back a structured description of the product — its name,
-its core actions/endpoints, how it authenticates, what's missing for agents. That structured
-data is then run through plain template code (no further AI calls) to produce the four files
-above and the audit score.
+1. **Fetch.** The backend reads your homepage, `robots.txt`, sitemap, `llms.txt`, well-known
+   API/MCP files and up to 8 key pages (pricing, docs, about, FAQ, …). It also requests the
+   homepage as an AI bot to see whether a firewall treats bots differently.
+2. **Measure.** 37 deterministic checks score six categories. No AI decides a pass or a
+   fail, so the same site always gets the same score.
+3. **Explain.** One LLM call writes the "How AI sees you" preview and the product facts used
+   for the fix-it pack. It is shown separately and never changes the score.
 
-It intentionally reads a *sample* of the content, not the whole site or repo — see
-[`CLAUDE.md`](CLAUDE.md) for the exact limits (crawl depth, file caps, character truncation)
-and why they're there.
+The scanner reads a sample of each site, not every page. See [`CLAUDE.md`](CLAUDE.md) for the
+exact limits and why they're there.
 
 ## Tech stack
 
@@ -41,7 +41,8 @@ and why they're there.
 | Backend | Python (FastAPI, fully async) |
 | Crawling | `httpx` + `BeautifulSoup4` |
 | GitHub data | GitHub REST API (unauthenticated, public repos only) |
-| LLM | [Groq](https://groq.com) — `openai/gpt-oss-120b` |
+| LLM | [Groq](https://groq.com) — `openai/gpt-oss-120b` (one call per scan) |
+| Storage | Postgres (e.g. Supabase) for saved reports — optional; in-memory without it |
 
 ## Getting started
 
@@ -58,6 +59,12 @@ cp .env.example .env      # then fill in GROQ_API_KEY
 uvicorn main:app --reload --port 8000
 ```
 
+Leave `DATABASE_URL` empty to run without saving reports, or set it to `memory://` to keep
+them in memory until restart (permalinks, badges and re-scan comparisons need saved reports).
+Apply `backend/migrations/001_reports.sql` to your Postgres database before using it.
+
+Run the tests with `pip install -r requirements-dev.txt && pytest`.
+
 ### Frontend
 
 ```bash
@@ -67,7 +74,7 @@ cp .env.example .env      # defaults to http://localhost:8000, adjust if needed
 npm run dev
 ```
 
-Open `http://localhost:5173`, paste a website or GitHub URL, and analyze.
+Open `http://localhost:5173`, paste a website URL, and analyze.
 
 ## CLI and GitHub Action
 

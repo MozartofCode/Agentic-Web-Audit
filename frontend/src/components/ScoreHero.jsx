@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { scoreTextClass } from '../status'
 import CategoryRings from './CategoryRings'
 
-export default function ScoreHero({ audit }) {
+export default function ScoreHero({ audit, repoOnly = false }) {
   const scoreRef = useRef(null)
   const { overall, grade, categories, critical_failures: criticalFailures } = audit
 
@@ -31,7 +31,9 @@ export default function ScoreHero({ audit }) {
         AI Readiness Score
       </h2>
       <p className="mt-1 text-center font-ui text-small text-text-muted">
-        Measured from your live site — every point links to the evidence below.
+        {repoOnly
+          ? 'Scored from the repository only, so just the developer checks apply. Check your website too for the full picture.'
+          : 'Measured from your live site. Every check below shows what we found and how to fix it.'}
       </p>
 
       <div className="mt-4 flex items-end justify-center gap-4" aria-label={`Score ${overall} out of 100, grade ${grade}`}>

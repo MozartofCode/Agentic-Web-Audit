@@ -1,8 +1,8 @@
 import ErrorBanner from './ErrorBanner'
 
 const FIELDS = [
-  { label: 'Your site', placeholder: 'https://yoursite.com' },
-  { label: 'Compare with', placeholder: 'https://competitor.com' },
+  { label: 'Your site', placeholder: 'yoursite.com' },
+  { label: 'Compare with', placeholder: 'competitor.com' },
 ]
 
 export default function CompareForm({ urls, onUrlsChange, onSubmit, validationError, errorMsg }) {
@@ -36,7 +36,11 @@ export default function CompareForm({ urls, onUrlsChange, onSubmit, validationEr
                 {field.label}
               </span>
               <input
-                type="url"
+                type="text"
+                inputMode="url"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 value={urls[i]}
                 onChange={(e) => handleChange(i, e.target.value)}
                 placeholder={field.placeholder}

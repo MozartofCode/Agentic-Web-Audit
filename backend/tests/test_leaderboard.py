@@ -176,8 +176,9 @@ def test_endpoint_is_empty_without_a_valid_snapshot(tmp_path: Path, monkeypatch,
 
 
 @pytest.mark.parametrize("detail,reason", [
-    ("The site returned 403. Try the GitHub URL alone.", "Blocks automated visitors (HTTP 403)"),
-    ("The site returned 404. Try the GitHub URL alone.", "Homepage returned HTTP 404"),
+    ("The site returned 403: it turns away automated visitors.",
+     "Blocks automated visitors (HTTP 403)"),
+    ("The site returned 404. Check the address and try again.", "Homepage returned HTTP 404"),
     ("Timed out connecting to https://x.test/.", "Timed out"),
     ("Could not reach https://x.test/.", "Couldn't be scanned"),
 ])

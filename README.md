@@ -16,6 +16,8 @@ exact fixes to paste in.
   scaffold for API products.
 - **Share and track** — permalinks, an embeddable score badge, re-scan comparisons, and
   side-by-side compare with a competitor.
+- **Leaderboard** — measured scores for ~55 well-known sites, with stats like how many
+  publish an `llms.txt` or block AI answer bots (`/leaderboard`).
 - **CLI and GitHub Action** — fail CI when your score drops (see below).
 
 ## How it works

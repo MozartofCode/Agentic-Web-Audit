@@ -38,6 +38,8 @@ agentready/
 │   ├── store.py               ← reports store: Postgres (asyncpg) / in-memory / null
 │   ├── delta.py               ← re-scan delta vs the previous report for a domain
 │   ├── share_images.py        ← README badge SVG + 1200×630 OG card PNG (Pillow)
+│   ├── leaderboard.py         ← GET /leaderboard + `python leaderboard.py` snapshot builder
+│   ├── data/leaderboard.json  ← committed leaderboard snapshot
 │   ├── migrations/            ← SQL for the reports table (apply by hand / Supabase)
 │   ├── crawler.py             ← HTML/robots/llms.txt parsing helpers
 │   ├── site_fetcher.py        ← SiteContext: one SSRF-safe fetch of everything checks need
@@ -248,6 +250,12 @@ Error (400):
 | `GET /badge/{domain}.svg` | "AI-Ready · NN" badge from the domain's latest report (`www.` ignored); "not scanned" if none |
 | `GET /og/{id}.png` | 1200×630 social card for a report |
 | `GET /share/{id}` | HTML with Open Graph/Twitter tags for link-preview bots; redirects people to `FRONTEND_URL/r/{id}` |
+| `GET /leaderboard` | ranked measured scores for the curated `LEADERBOARD_SITES`, plus headline stats and sites that blocked the scanner; served from `backend/data/leaderboard.json` |
+
+**Leaderboard:** `cd backend && python leaderboard.py` rescans every site in
+`leaderboard.LEADERBOARD_SITES` (`--only a.com b.com` to rescan a few) and rewrites the snapshot.
+It runs the deterministic audit only, with no LLM call, so it costs $0 in Groq usage. Commit the
+updated JSON to publish it. Only curated sites are listed, never sites users scanned.
 
 The frontend permalinks are `/r/:id` and `/compare/:idA/:idB`. Vercel serves the SPA for
 every path (`vercel.json`); `frontend/middleware.js` sends link-preview bots on `/r/:id` to

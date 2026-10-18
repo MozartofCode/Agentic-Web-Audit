@@ -10,6 +10,7 @@ export default function LandingView({
   onGithubChange,
   onSubmit,
   onCompare,
+  onLeaderboard,
   loading,
   validationError,
   errorMsg,
@@ -50,6 +51,13 @@ export default function LandingView({
             className="mt-6 rounded px-2 py-1 font-ui text-[13px] text-text-muted transition-colors duration-100 hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent/30"
           >
             Or compare two sites side by side →
+          </button>
+          <button
+            type="button"
+            onClick={onLeaderboard}
+            className="mt-1 rounded px-2 py-1 font-ui text-[13px] text-text-muted transition-colors duration-100 hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent/30"
+          >
+            See how popular sites score →
           </button>
         </div>
       </div>

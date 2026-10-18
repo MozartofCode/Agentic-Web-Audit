@@ -42,6 +42,11 @@ export function compareSites(urlA, urlB) {
   return postJson('/compare', { website_urls: [urlA, urlB] }, 'Comparison failed, try again.')
 }
 
+/** Calls GET /leaderboard: ranked measured scores for well-known sites. */
+export function getLeaderboard() {
+  return request('/leaderboard', undefined, "Couldn't load the leaderboard.")
+}
+
 /** URL of the README badge for a domain. */
 export function badgeUrl(domain) {
   return `${API_URL}/badge/${encodeURIComponent(domain)}.svg`

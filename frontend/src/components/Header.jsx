@@ -1,4 +1,4 @@
-export default function Header({ showNewAnalysis, onNewAnalysis }) {
+export default function Header({ showNewAnalysis, onNewAnalysis, onLeaderboard }) {
   return (
     <header className="fixed top-0 left-0 right-0 z-100 h-14 border-b border-border-subtle bg-bg-base/85 backdrop-blur-md">
       <div className="mx-auto flex h-full max-w-[900px] items-center justify-between px-6">
@@ -14,16 +14,25 @@ export default function Header({ showNewAnalysis, onNewAnalysis }) {
           <span />
         )}
 
-        {!showNewAnalysis && (
-          <a
-            href="https://github.com/MozartofCode/Agentic-Web-Audit"
-            target="_blank"
-            rel="noreferrer"
-            className="hidden font-ui text-[13px] text-text-muted transition-colors duration-100 hover:text-text-secondary sm:inline-block"
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={onLeaderboard}
+            className="rounded px-1 font-ui text-[13px] text-text-muted transition-colors duration-100 hover:text-text-secondary focus:outline-none focus:ring-2 focus:ring-accent/30"
           >
-            Star on GitHub
-          </a>
-        )}
+            Leaderboard
+          </button>
+          {!showNewAnalysis && (
+            <a
+              href="https://github.com/MozartofCode/Agentic-Web-Audit"
+              target="_blank"
+              rel="noreferrer"
+              className="hidden font-ui text-[13px] text-text-muted transition-colors duration-100 hover:text-text-secondary sm:inline-block"
+            >
+              Star on GitHub
+            </a>
+          )}
+        </div>
       </div>
     </header>
   )

@@ -12,6 +12,7 @@ load_dotenv()  # must run before anything reads env (llm_analyzer reads GROQ_API
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from leaderboard import router as leaderboard_router
 from reports import router as reports_router
 from store import create_store
 
@@ -40,6 +41,7 @@ app.add_middleware(
 )
 
 app.include_router(reports_router)
+app.include_router(leaderboard_router)
 
 
 @app.get("/health")

@@ -1,4 +1,7 @@
-/** Tiny pathname router: / (home), /r/:id (saved report), /compare[/:a/:b] (side by side). */
+/**
+ * Tiny pathname router: / (home), /r/:id (saved report), /compare[/:a/:b] (side by side),
+ * /leaderboard.
+ */
 
 const ID = '([A-Za-z0-9_-]{6,32})'
 const REPORT = new RegExp(`^/r/${ID}/?$`)
@@ -9,8 +12,11 @@ export function parseRoute(pathname) {
   if (report) return { name: 'report', id: report[1] }
   const compare = pathname.match(COMPARE)
   if (compare) return { name: 'compare', ids: compare[1] ? [compare[1], compare[2]] : null }
+  if (/^\/leaderboard\/?$/.test(pathname)) return { name: 'leaderboard' }
   return { name: 'home' }
 }
+
+export const LEADERBOARD_PATH = '/leaderboard'
 
 export function reportPath(reportId) {
   return `/r/${reportId}`

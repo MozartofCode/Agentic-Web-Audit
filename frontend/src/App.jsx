@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { analyzeProduct, compareSites, getReport } from './api'
-import { comparePath, parseRoute, reportPath, siteDomain } from './routes'
+import { LEADERBOARD_PATH, comparePath, parseRoute, reportPath, siteDomain } from './routes'
 import CompareForm from './components/CompareForm'
 import CompareView from './components/CompareView'
 import Header from './components/Header'
 import LandingView from './components/LandingView'
+import LeaderboardView from './components/LeaderboardView'
 import LoadingView from './components/LoadingView'
 import ResultsView from './components/ResultsView'
 
@@ -173,6 +174,13 @@ export default function App() {
     navigate(comparePath())
   }
 
+  function handleScanFromLeaderboard(url) {
+    setInputMode('website')
+    markShown('home') // so the route effect doesn't reset the scan we're about to start
+    navigate('/')
+    runAnalysis({ website: url, github: '' })
+  }
+
   function handleNewAnalysis() {
     setAppState('idle')
     setResults(null)
@@ -188,6 +196,7 @@ export default function App() {
   }
 
   const onCompareRoute = route.name === 'compare'
+  const onLeaderboardRoute = route.name === 'leaderboard'
   const loadingDomains = onCompareRoute ? compareUrls : [websiteUrl, githubUrl]
 
   return (
@@ -195,6 +204,7 @@ export default function App() {
       <Header
         showNewAnalysis={appState === 'done' || route.name !== 'home'}
         onNewAnalysis={handleNewAnalysis}
+        onLeaderboard={() => navigate(LEADERBOARD_PATH)}
       />
 
       <main className="pt-14">
@@ -212,7 +222,11 @@ export default function App() {
           />
         )}
 
-        {(appState === 'idle' || appState === 'error') && !onCompareRoute && (
+        {appState !== 'loading' && onLeaderboardRoute && (
+          <LeaderboardView onScan={handleScanFromLeaderboard} />
+        )}
+
+        {(appState === 'idle' || appState === 'error') && !onCompareRoute && !onLeaderboardRoute && (
           <LandingView
             inputMode={inputMode}
             onModeChange={setInputMode}
@@ -222,6 +236,7 @@ export default function App() {
             onGithubChange={setGithubUrl}
             onSubmit={handleSubmit}
             onCompare={() => navigate(comparePath())}
+            onLeaderboard={() => navigate(LEADERBOARD_PATH)}
             loading={false}
             validationError={validationError}
             errorMsg={errorMsg}

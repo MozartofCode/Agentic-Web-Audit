@@ -1,0 +1,19 @@
+{
+  "name": "agentready",
+  "version": "0.1.0",
+  "description": "Scan a website for AI readiness from the terminal or CI, and fail the build if the score drops.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "agentready": "./agentready.mjs"
+  },
+  "files": [
+    "agentready.mjs"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

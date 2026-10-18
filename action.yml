@@ -1,0 +1,61 @@
+name: AgentReady scan
+description: Scan a website for AI readiness and fail the job if the score drops below a minimum.
+author: AgentReady
+branding:
+  icon: check-circle
+  color: blue
+
+inputs:
+  url:
+    description: Website URL to scan.
+    required: true
+  min-score:
+    description: Fail the step if the overall score (0-100) is below this. Leave empty to never fail.
+    required: false
+    default: ""
+  api-url:
+    description: AgentReady backend URL.
+    required: true
+  app-url:
+    description: AgentReady web app URL, used to link to the full report.
+    required: false
+    default: ""
+  github-url:
+    description: Optional public GitHub repo to include in the analysis.
+    required: false
+    default: ""
+  refresh:
+    description: Skip the server's 24h cache and rescan ("true" or "false").
+    required: false
+    default: "true"
+
+outputs:
+  score:
+    description: Overall AI-readiness score (0-100).
+    value: ${{ steps.scan.outputs.score }}
+  grade:
+    description: Letter grade (A-F).
+    value: ${{ steps.scan.outputs.grade }}
+  report-url:
+    description: Link to the full report (empty if app-url isn't set or the server doesn't save reports).
+    value: ${{ steps.scan.outputs.report-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Run AgentReady
+      id: scan
+      shell: bash
+      env:
+        INPUT_URL: ${{ inputs.url }}
+        INPUT_MIN_SCORE: ${{ inputs.min-score }}
+        INPUT_GITHUB_URL: ${{ inputs.github-url }}
+        INPUT_REFRESH: ${{ inputs.refresh }}
+        AGENTREADY_API_URL: ${{ inputs.api-url }}
+        AGENTREADY_APP_URL: ${{ inputs.app-url }}
+      run: |
+        args=("$INPUT_URL")
+        if [ -n "$INPUT_MIN_SCORE" ]; then args+=(--min-score "$INPUT_MIN_SCORE"); fi
+        if [ -n "$INPUT_GITHUB_URL" ]; then args+=(--github "$INPUT_GITHUB_URL"); fi
+        if [ "$INPUT_REFRESH" = "true" ]; then args+=(--refresh); fi
+        node "$GITHUB_ACTION_PATH/cli/agentready.mjs" "${args[@]}"

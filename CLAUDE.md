@@ -52,6 +52,8 @@ agentready/
 │   ├── models.py
 │   ├── prompts.py
 │   └── requirements.txt
+├── cli/agentready.mjs          ← dependency-free Node CLI; `node --test` in cli/
+├── action.yml                 ← GitHub Action wrapping the CLI
 └── frontend/
     ├── src/
     │   ├── App.jsx

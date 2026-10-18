@@ -1,7 +1,9 @@
+import AIPreviewCard from './AIPreviewCard'
 import ArtifactSection from './ArtifactSection'
 import CheckList from './CheckList'
 import CrawlerMatrix from './CrawlerMatrix'
 import ScoreHero from './ScoreHero'
+import TopFixes from './TopFixes'
 
 function domainOf(url) {
   try {
@@ -12,7 +14,7 @@ function domainOf(url) {
 }
 
 export default function ResultsView({ results }) {
-  const { audit } = results
+  const { audit, fix_pack: fixPack } = results
   const scanned = audit.pages_scanned
 
   return (
@@ -38,6 +40,16 @@ export default function ResultsView({ results }) {
         <ScoreHero audit={audit} />
       </div>
 
+      {audit.top_fixes.length > 0 && (
+        <div className="mt-6">
+          <TopFixes fixes={audit.top_fixes} />
+        </div>
+      )}
+
+      <div className="mt-6">
+        <AIPreviewCard preview={results.ai_preview} />
+      </div>
+
       {audit.crawler_access.length > 0 && (
         <div className="mt-6">
           <CrawlerMatrix entries={audit.crawler_access} />
@@ -49,8 +61,15 @@ export default function ResultsView({ results }) {
       </div>
 
       <div className="mt-6">
-        <h2 className="mb-3 font-ui text-h2 font-semibold text-text-primary">Fix-it pack</h2>
-        <ArtifactSection artifacts={results.artifacts} />
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-ui text-h2 font-semibold text-text-primary">Fix-it pack</h2>
+          {fixPack.platform && (
+            <span className="font-ui text-[13px] text-text-muted" title={fixPack.platform.evidence}>
+              Built on <span className="text-text-secondary">{fixPack.platform.name}</span>
+            </span>
+          )}
+        </div>
+        <ArtifactSection files={fixPack.files} platform={fixPack.platform} />
       </div>
     </section>
   )

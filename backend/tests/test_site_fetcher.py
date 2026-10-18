@@ -88,3 +88,43 @@ def test_select_key_pages_prefers_shallow_same_origin_links() -> None:
 def test_parse_sitemap_locs() -> None:
     xml = "<urlset><url><loc> https://a.example/x </loc></url><url><loc>https://a.example/y</loc>"
     assert parse_sitemap_locs(xml) == ["https://a.example/x", "https://a.example/y"]
+
+
+def test_select_key_pages_handles_locale_and_docs_prefixes() -> None:
+    body = (
+        '<a href="/docs/en/about-claude/pricing">Pricing</a>'
+        '<a href="/docs/en/api/overview">API</a>'
+        '<a href="/docs/en/build-with-claude/a/b/c/faq">Too deep</a>'
+        '<a href="/de/kontakt">Kontakt</a> <a href="/en/contact">Contact</a>'
+    )
+    context = ctx(body=body)
+    context.url = ORIGIN + "/docs/en/home"
+    selected = select_key_pages(context)
+    assert selected["pricing"] == ORIGIN + "/docs/en/about-claude/pricing"
+    assert selected["docs"] == ORIGIN + "/docs/en/api/overview"
+    assert selected["contact"] == ORIGIN + "/en/contact"
+    assert "faq" not in selected
+
+
+def test_select_key_pages_prefers_shallowest_match() -> None:
+    body = '<a href="/docs/guides/start">Guide</a> <a href="/docs">Docs</a>'
+    assert select_key_pages(ctx(body=body))["docs"] == ORIGIN + "/docs"
+
+
+def test_select_key_pages_skips_section_roots_and_reuses_no_url() -> None:
+    body = (
+        '<a href="/docs">Docs root</a> <a href="/docs/en/about-claude/pricing">Pricing</a>'
+        '<a href="/docs/en/about-claude/models">Models</a>'
+    )
+    context = ctx(body=body)
+    context.url = ORIGIN + "/docs/en/home"
+    selected = select_key_pages(context)
+    assert "docs" not in selected  # /docs just redirects back to the scanned page
+    assert selected["pricing"] == ORIGIN + "/docs/en/about-claude/pricing"
+    assert selected["about"] == ORIGIN + "/docs/en/about-claude/models"
+
+
+def test_select_key_pages_ignores_translations_of_the_start_page() -> None:
+    context = ctx(body='<a href="/docs/de/home">Deutsch</a> <a href="/docs/de">DE</a>')
+    context.url = ORIGIN + "/docs/en/home"
+    assert select_key_pages(context) == {}

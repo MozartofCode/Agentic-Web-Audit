@@ -11,7 +11,7 @@ from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 import httpx
-from bs4 import BeautifulSoup, Comment
+from bs4 import BeautifulSoup, Comment, Doctype
 from fastapi import HTTPException
 
 from crawler import (
@@ -32,6 +32,9 @@ MAX_KEY_PAGES = 8
 MAX_HTML_BYTES = 3_000_000
 MAX_TEXT_FILE_BYTES = 500_000
 MAX_SITEMAP_URLS = 500
+MAX_KEY_PAGE_DEPTH = 3
+MAX_EXCERPT_CHARS = 2000
+LOCALE_SEGMENT = re.compile(r"^[a-z]{2}(?:[-_][a-z]{2,4})?$")
 
 BROWSER_UA = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
@@ -147,7 +150,7 @@ class SiteContext:
                 s.strip()
                 for s in self.soup(page).find_all(string=True)
                 if s.parent is not None and s.parent.name not in NON_CONTENT_TAGS
-                and not isinstance(s, Comment)
+                and not isinstance(s, (Comment, Doctype))
             )
             self._texts[page.url] = " ".join(s for s in strings if s)
         return self._texts[page.url]
@@ -362,6 +365,7 @@ def select_key_pages(ctx: SiteContext) -> dict[str, str]:
         candidates.append(urljoin(ctx.url, a["href"]).split("#")[0])
     candidates += ctx.sitemap_urls
 
+    base = base_segments(ctx.url)
     same_origin = []
     for candidate in dict.fromkeys(candidates):
         parsed = urlparse(candidate)
@@ -369,13 +373,21 @@ def select_key_pages(ctx: SiteContext) -> dict[str, str]:
             continue
         if parsed.netloc.lower().removeprefix("www.") != host or candidate.rstrip("/") == home:
             continue
+        if _is_ancestor_of_base(candidate, base):  # /docs on a /docs/en/home scan → home
+            continue
         same_origin.append(candidate)
 
     selected: dict[str, str] = {}
     for kind, keywords in KEY_PAGE_KEYWORDS.items():
         for keyword in keywords:
-            match = next((u for u in same_origin if _path_has_keyword(u, keyword)), None)
-            if match and match not in selected.values():
+            # Shallowest match wins: /pricing over /blog/2021/our-pricing-changes.
+            matches = [
+                (depth, u) for u in same_origin
+                if u not in selected.values()
+                and (depth := _keyword_depth(u, keyword, base)) is not None
+            ]
+            match = min(matches, key=lambda m: m[0])[1] if matches else None
+            if match:
                 selected[kind] = match
                 break
         if len(selected) >= MAX_KEY_PAGES:
@@ -383,13 +395,56 @@ def select_key_pages(ctx: SiteContext) -> dict[str, str]:
     return selected
 
 
-def _path_has_keyword(url: str, keyword: str) -> bool:
-    segments = [s for s in urlparse(url).path.lower().split("/") if s]
-    # Prefer shallow pages: /pricing over /blog/2021/our-pricing-changes.
-    return len(segments) <= 2 and any(
-        s == keyword or s.startswith(keyword + "-") or s.startswith(keyword + ".")
-        for s in segments
-    )
+def _is_locale(segment: str) -> bool:
+    return bool(LOCALE_SEGMENT.match(segment))
+
+
+def _path_segments(url: str) -> list[str]:
+    """Lowercased path segments with locale segments (en, de, en-us, pt_br) removed."""
+    return [s for s in urlparse(url).path.lower().split("/") if s and not _is_locale(s)]
+
+
+def base_segments(url: str) -> list[str]:
+    """
+    The section of the site the scan started in, e.g. ['docs'] for /docs/en/home.
+
+    Deep docs sites (docs.example.com → example.com/docs/en/intro) put every page under a
+    prefix, so page depth is measured relative to it. Locales are ignored, so /docs/de/home
+    counts as the same section.
+    """
+    path = urlparse(url).path.lower()
+    segments = _path_segments(url)
+    if segments and not path.endswith("/") and not _is_locale(path.rstrip("/").split("/")[-1]):
+        segments = segments[:-1]  # /docs/en/home → the "home" page lives in /docs/en/
+    return segments
+
+
+def _is_ancestor_of_base(url: str, base: list[str]) -> bool:
+    """/docs or /docs/de on a /docs/en/home scan: section roots that lead back to the start."""
+    segments = _path_segments(url)
+    return bool(segments) and len(segments) <= len(base) and base[: len(segments)] == segments
+
+
+def relative_segments(url: str, base: list[str]) -> list[str]:
+    """Locale-free path segments below the scan's base section."""
+    segments = _path_segments(url)
+    if base and segments[: len(base)] == base:
+        segments = segments[len(base):]
+    return segments
+
+
+def _segment_matches(segment: str, keyword: str) -> bool:
+    return segment == keyword or segment.startswith((keyword + "-", keyword + "."))
+
+
+def _keyword_depth(url: str, keyword: str, base: list[str]) -> int | None:
+    """Relative depth of `url` if one of its first two segments names `keyword`, else None."""
+    segments = relative_segments(url, base)
+    if len(segments) > MAX_KEY_PAGE_DEPTH:
+        return None
+    if any(_segment_matches(s, keyword) for s in segments[:2]):
+        return len(segments)
+    return None
 
 
 def is_challenge_page(page: FetchedPage) -> bool:
@@ -407,6 +462,7 @@ def website_data_from_context(ctx: SiteContext) -> dict:
         tag.decompose()
     title = soup.find("title")
     return {
+        "url": ctx.url,
         "title": title.get_text(strip=True) if title else "",
         "description": get_meta_description(soup),
         "headings": [h.get_text(strip=True) for h in soup.find_all(["h1", "h2", "h3"])[:20]],
@@ -415,3 +471,21 @@ def website_data_from_context(ctx: SiteContext) -> dict:
         "has_llms_txt": looks_like_llms_txt(ctx.llms_txt),
         "blocked_ai_bots": blocked_ai_bots(ctx.robots_txt) if ctx.robots_txt else [],
     }
+
+
+def key_page_excerpts(ctx: SiteContext) -> list[dict]:
+    """Readable text of each fetched key page, for the LLM prompt (homepage excluded)."""
+    excerpts = []
+    for kind, page in ctx.pages.items():
+        if not (page.ok and page.is_html):
+            continue
+        title = ctx.soup(page).title
+        excerpts.append(
+            {
+                "kind": kind,
+                "url": page.url,
+                "title": title.get_text(strip=True) if title else "",
+                "text": ctx.visible_text(page)[:MAX_EXCERPT_CHARS],
+            }
+        )
+    return excerpts

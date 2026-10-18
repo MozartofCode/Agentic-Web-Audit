@@ -42,6 +42,7 @@ def llms_txt_template(ctx: SiteContext) -> str:
     weight=8,
     why="/llms.txt is a short markdown map of your site written for language models — the "
     "fastest way to tell an AI what matters.",
+    effort="minutes",
 )
 def llms_txt(ctx: SiteContext) -> Outcome:
     text = ctx.llms_txt
@@ -170,6 +171,7 @@ def control_names(ctx: SiteContext) -> Outcome:
     weight=2,
     why="A <div onclick> doesn't appear as a control in the accessibility tree, so agents "
     "can't find it.",
+    effort="dev",
 )
 def clickable_divs(ctx: SiteContext) -> Outcome:
     offenders = [
@@ -194,6 +196,7 @@ def clickable_divs(ctx: SiteContext) -> Outcome:
     weight=4,
     why="Agents can't solve CAPTCHAs. A CAPTCHA on sign-up or contact blocks every agent "
     "trying to act for a customer.",
+    effort="dev",
 )
 def captcha(ctx: SiteContext) -> Outcome:
     found = {

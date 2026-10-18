@@ -29,6 +29,7 @@ def word_count(text: str) -> int:
     why="GPTBot, ClaudeBot and PerplexityBot don't execute JavaScript. If your text is "
     "rendered client-side, AI sees an empty page.",
     critical=True,
+    effort="dev",
 )
 def raw_html_text(ctx: SiteContext) -> Outcome:
     words = word_count(ctx.visible_text(ctx.homepage))
@@ -71,6 +72,7 @@ def h1_present(ctx: SiteContext) -> Outcome:
     "Homepage responds quickly",
     weight=4,
     why="AI assistants fetch pages while the user waits and give up on slow sites.",
+    effort="dev",
 )
 def response_time(ctx: SiteContext) -> Outcome:
     ms = ctx.homepage.elapsed_ms
@@ -87,6 +89,7 @@ def response_time(ctx: SiteContext) -> Outcome:
     "HTML is a reasonable size",
     weight=3,
     why="Crawlers truncate very large HTML documents, so content near the end may be lost.",
+    effort="dev",
 )
 def page_weight(ctx: SiteContext) -> Outcome:
     kb = ctx.homepage.size_bytes // 1024
@@ -103,6 +106,7 @@ def page_weight(ctx: SiteContext) -> Outcome:
     "Key pages are readable without JavaScript",
     weight=5,
     why="Pricing, docs and about pages are what assistants quote — they need text in the HTML.",
+    effort="dev",
 )
 def key_pages_text(ctx: SiteContext) -> Outcome:
     pages = [p for p in ctx.pages.values() if p.ok and p.is_html]

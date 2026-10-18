@@ -36,6 +36,9 @@ agentready/
 │   ├── crawler.py             ← HTML/robots/llms.txt parsing helpers
 │   ├── site_fetcher.py        ← SiteContext: one SSRF-safe fetch of everything checks need
 │   ├── checks/                ← measured audit: one module per category, @check registry
+│   ├── fix_pack.py            ← Fix-it pack v2: llms.txt, robots diff, JSON-LD, meta tags
+│   ├── platform_detect.py     ← WordPress/Shopify/Webflow/Wix/Squarespace/Framer/Next.js
+│   ├── platform_guides.py     ← "how to add this" steps per platform
 │   ├── safety.py
 │   ├── github_fetcher.py
 │   ├── llm_analyzer.py
@@ -53,6 +56,7 @@ agentready/
     │   │   ├── ResultsView.jsx
     │   │   ├── InputForm.jsx
     │   │   ├── ScoreHero.jsx / CategoryRings.jsx
+    │   │   ├── TopFixes.jsx / AIPreviewCard.jsx
     │   │   ├── CrawlerMatrix.jsx
     │   │   ├── CheckList.jsx / CheckItem.jsx / CopyButton.jsx
     │   │   ├── ArtifactSection.jsx
@@ -174,15 +178,34 @@ Response (200):
     "crawler_access": [{ "bot": "GPTBot", "owner": "OpenAI",
                          "purpose": "training|search|user",
                          "status": "allowed|partial|blocked", "detail": "..." }],
-    "pages_scanned": ["https://example.com/", "https://example.com/pricing"]
+    "pages_scanned": ["https://example.com/", "https://example.com/pricing"],
+    "top_fixes": [{ "check_id": "llms_txt", "title": "...", "category": "agent",
+                    "status": "fail", "effort": "minutes|hour|dev", "points": 5,
+                    "evidence": "...", "fix": "...", "fix_language": "markdown" }]
+  },
+  "ai_preview": {                 // LLM, qualitative only — never part of the score
+    "summary": "2-3 sentences an assistant would say",
+    "unknowns": [{ "fact": "Pricing", "fix": "State prices as text on /pricing" }],
+    "questions": [{ "question": "...", "answered": true, "answer": "...",
+                    "source": "https://example.com/pricing" }]   // source ∈ scanned pages
+  },
+  "fix_pack": {
+    "platform": { "id": "wordpress", "name": "WordPress", "evidence": "..." },  // nullable
+    "developer_track": false,
+    "files": [{ "id": "llms_txt|robots_txt|json_ld|meta_tags|openapi|mcp_server",
+                "label": "...", "filename": "...", "language": "markdown|diff|html|...",
+                "content": "...", "description": "...", "how_to": ["step"],
+                "developer": false }]   // OpenAPI/MCP only on the developer track
   }
 }
 ```
 
 `audit_score` is the legacy 6-check rubric (mostly LLM-judged); new UI work uses `audit`.
 To add a check: write a function in the right `backend/checks/<category>.py` decorated with
-`@check(...)`, returning `Outcome(status, evidence, fix)`, and add a fixture case to
-`backend/tests/test_checks.py` (a test fails if any check has no case).
+`@check(...)` (set `effort="minutes"|"hour"|"dev"` — it ranks the fix in Top fixes, which
+orders by weight × severity ÷ effort and shows the simulated "+N points"), returning
+`Outcome(status, evidence, fix)`, and add a fixture case to `backend/tests/test_checks.py`
+(a test fails if any check has no case).
 
 Error (400):
 ```json
@@ -253,7 +276,8 @@ wait for the result and then click "New Analysis" in the header.
 
 1. **Model**: Always `openai/gpt-oss-120b` via Groq. Never change this without updating CLAUDE.md.
 2. **Temperature**: Always `0.1` for structured JSON output calls.
-3. **Max tokens**: `2000` for the main analysis call.
+3. **Max tokens**: `4000` for the main analysis call (it also returns the AI preview, and
+   gpt-oss reasoning tokens count against the limit).
 4. **System prompt**: Must instruct the model to return ONLY valid JSON, no markdown fences,
    no explanation.
 5. **Parsing**: Wrap JSON parsing in try/except. If parsing fails, log the raw response and

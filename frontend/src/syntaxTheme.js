@@ -22,4 +22,10 @@ export const agentReadyTheme = {
   operator: { color: '#94a3b8' },
   property: { color: '#7dd3fc' },
   punctuation: { color: '#52525b' },
+  tag: { color: '#06b6d4' },
+  'attr-name': { color: '#7dd3fc' },
+  'attr-value': { color: '#86efac' },
+  coord: { color: '#c4b5fd' },
+  inserted: { color: '#22c55e' },
+  deleted: { color: '#ef4444' },
 }

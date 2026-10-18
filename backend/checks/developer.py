@@ -71,6 +71,7 @@ DEV = {
     why="An OpenAPI spec is the machine-readable contract agents and SDK generators use to "
     "call your API correctly.",
     **DEV,
+    effort="dev",
 )
 def openapi_spec(ctx: SiteContext) -> Outcome:
     found = [p for p in ("/openapi.json", "/openapi.yaml", "/swagger.json",
@@ -97,6 +98,7 @@ def openapi_spec(ctx: SiteContext) -> Outcome:
     why="Agents (and the developers building them) need reference docs for endpoints, "
     "parameters and errors.",
     **DEV,
+    effort="dev",
 )
 def api_docs(ctx: SiteContext) -> Outcome:
     docs = ctx.pages.get("docs")
@@ -120,6 +122,7 @@ def api_docs(ctx: SiteContext) -> Outcome:
     why="An MCP server lets Claude, ChatGPT and IDE agents use your product as a tool, "
     "without custom integration code.",
     **DEV,
+    effort="dev",
 )
 def mcp_server(ctx: SiteContext) -> Outcome:
     for path in MCP_PATHS:

@@ -2,7 +2,7 @@
 
 from typing import Literal, Optional
 
-from pydantic import BaseModel, HttpUrl, model_validator
+from pydantic import BaseModel, HttpUrl, field_validator, model_validator
 
 
 class AnalyzeRequest(BaseModel):
@@ -27,6 +27,63 @@ class CoreAction(BaseModel):
     endpoint: str
 
 
+MAX_AI_QUESTIONS = 8
+MAX_AI_UNKNOWNS = 5
+
+
+class AIUnknown(BaseModel):
+    """A fact an AI assistant couldn't determine from the site, and how to state it."""
+
+    fact: str
+    fix: str = ""
+
+
+class AIQuestion(BaseModel):
+    """A question customers are likely to ask an AI, and whether the site answers it."""
+
+    question: str
+    answered: bool = False
+    answer: str = ""  # short answer drawn from the site; empty when not answered
+    source: str = ""  # URL of the scanned page that answers it
+
+
+class AIPreview(BaseModel):
+    """'How AI sees you': the one-call LLM read of the scanned pages (qualitative, not scored)."""
+
+    summary: str = ""
+    unknowns: list[AIUnknown] = []
+    questions: list[AIQuestion] = []
+
+    def grounded_in(self, page_urls: list[str]) -> "AIPreview":
+        """
+        Copy with every cited source checked against the pages actually scanned.
+
+        A question cited to a page we never sent the model is downgraded to "not answered",
+        so the report never links to a source that doesn't exist.
+        """
+        allowed = {u.rstrip("/") for u in page_urls}
+        questions = []
+        for q in self.questions[:MAX_AI_QUESTIONS]:
+            if not q.question.strip():
+                continue
+            grounded = q.answered and (not allowed or q.source.rstrip("/") in allowed)
+            questions.append(
+                AIQuestion(
+                    question=q.question.strip(),
+                    answered=grounded,
+                    answer=q.answer.strip() if grounded else "",
+                    source=q.source if grounded and allowed else "",
+                )
+            )
+        unknowns = [u for u in self.unknowns if u.fact.strip()][:MAX_AI_UNKNOWNS]
+        return AIPreview(summary=self.summary.strip(), unknowns=unknowns, questions=questions)
+
+
+BusinessType = Literal[
+    "local_business", "ecommerce", "saas", "developer_tool", "publisher", "nonprofit", "other"
+]
+
+
 class ProductAnalysis(BaseModel):
     """Internal model — output of LLM parsing, input to the artifact generator."""
 
@@ -41,6 +98,14 @@ class ProductAnalysis(BaseModel):
     webhook_support: bool
     missing_agent_features: list[str]
     recommendations: list[str]
+    business_type: BusinessType = "other"
+    ai_preview: AIPreview = AIPreview()
+
+    @field_validator("business_type", mode="before")
+    @classmethod
+    def unknown_business_type_is_other(cls, value: object) -> object:
+        allowed = BusinessType.__args__  # type: ignore[attr-defined]
+        return value if value in allowed else "other"
 
 
 class AuditBreakdown(BaseModel):
@@ -110,6 +175,23 @@ class CrawlerAccess(BaseModel):
     detail: str
 
 
+Effort = Literal["minutes", "hour", "dev"]
+
+
+class TopFix(BaseModel):
+    """One of the highest-value fixes, with its estimated score gain."""
+
+    check_id: str
+    title: str
+    category: str
+    status: Literal["warn", "fail"]
+    effort: Effort
+    points: int  # estimated overall-score gain if this check passed
+    evidence: str
+    fix: str
+    fix_language: str = "text"
+
+
 class Audit(BaseModel):
     """The measured agent-readiness audit (deterministic — no LLM judgment in pass/fail)."""
 
@@ -120,6 +202,36 @@ class Audit(BaseModel):
     crawler_access: list[CrawlerAccess]
     pages_scanned: list[str]
     critical_failures: list[str] = []  # titles of failed critical checks; they cap `overall`
+    top_fixes: list[TopFix] = []
+
+
+class Platform(BaseModel):
+    """The CMS / site builder / framework the site appears to run on."""
+
+    id: str
+    name: str
+    evidence: str
+
+
+class FixPackFile(BaseModel):
+    """One paste-ready file or snippet in the Fix-it pack."""
+
+    id: str
+    label: str
+    filename: str
+    language: str
+    content: str
+    description: str
+    how_to: list[str] = []  # platform-specific steps to install it
+    developer: bool = False  # developer-track artifact (OpenAPI, MCP)
+
+
+class FixPack(BaseModel):
+    """Paste-ready fixes built from the crawled pages, tailored to the detected platform."""
+
+    platform: Optional[Platform] = None
+    developer_track: bool = False
+    files: list[FixPackFile]
 
 
 class AnalyzeResponse(BaseModel):
@@ -130,3 +242,5 @@ class AnalyzeResponse(BaseModel):
     artifacts: Artifacts
     audit_score: AuditScore
     audit: Audit
+    ai_preview: AIPreview
+    fix_pack: FixPack

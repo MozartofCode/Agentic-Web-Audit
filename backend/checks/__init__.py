@@ -14,7 +14,7 @@ from checks import (  # noqa: F401 — importing registers each module's checks
 )
 from checks.base import REGISTRY, CheckSpec, Outcome
 from checks.crawler_access import crawler_access_matrix
-from models import Audit, CategoryScore, CheckResult
+from models import Audit, CategoryScore, CheckResult, TopFix
 from site_fetcher import SiteContext
 
 logger = logging.getLogger(__name__)
@@ -31,6 +31,9 @@ CATEGORIES: dict[str, tuple[str, str, int]] = {
 STATUS_POINTS = {"pass": 1.0, "warn": 0.5, "fail": 0.0}
 GRADES = ((90, "A"), (80, "B"), (65, "C"), (50, "D"), (0, "F"))
 CRITICAL_CAP = 49
+TOP_FIXES = 5
+SEVERITY = {"fail": 1.0, "warn": 0.5}
+EFFORT_COST = {"minutes": 1, "hour": 2, "dev": 4}
 
 
 def _evaluate(spec: CheckSpec, ctx: SiteContext) -> Outcome:
@@ -95,17 +98,8 @@ def run_audit(ctx: SiteContext) -> Audit:
             )
         )
 
-    categories = [
-        _category_score(cat, [r for r in results if r.category == cat]) for cat in CATEGORIES
-    ]
-    weighted = [(c.score, CATEGORIES[c.id][2]) for c in categories if c.score is not None]
-    weight_sum = sum(w for _, w in weighted)
-    overall = round(sum(s * w for s, w in weighted) / weight_sum) if weight_sum else 0
-
     critical_ids = {spec.id for spec in REGISTRY if spec.critical}
-    critical_failures = [r.title for r in results if r.id in critical_ids and r.status == "fail"]
-    if critical_failures:
-        overall = min(overall, CRITICAL_CAP)
+    overall, categories, critical_failures = score_results(results, critical_ids)
 
     pages = [ctx.homepage.url] if ctx.homepage else []
     pages += [p.url for p in ctx.pages.values() if p.ok]
@@ -118,4 +112,78 @@ def run_audit(ctx: SiteContext) -> Audit:
         crawler_access=crawler_access_matrix(ctx) if ctx.has_website else [],
         pages_scanned=pages,
         critical_failures=critical_failures,
+        top_fixes=top_fixes(results, critical_ids),
     )
+
+
+def score_results(
+    results: list[CheckResult], critical_ids: set[str], apply_cap: bool = True
+) -> tuple[int, list[CategoryScore], list[str]]:
+    """(overall score, category scores, failed critical check titles) for a set of results."""
+    categories = [
+        _category_score(cat, [r for r in results if r.category == cat]) for cat in CATEGORIES
+    ]
+    weighted = [(c.score, CATEGORIES[c.id][2]) for c in categories if c.score is not None]
+    weight_sum = sum(w for _, w in weighted)
+    overall = round(sum(s * w for s, w in weighted) / weight_sum) if weight_sum else 0
+
+    critical_failures = [r.title for r in results if r.id in critical_ids and r.status == "fail"]
+    if critical_failures and apply_cap:
+        overall = min(overall, CRITICAL_CAP)
+    return overall, categories, critical_failures
+
+
+def _gain_if_fixed(results: list[CheckResult], index: int, critical_ids: set[str]) -> int:
+    """
+    Estimated overall-score gain if results[index] passed, everything else unchanged.
+
+    When another critical check still caps the score, the uncapped gain is shown instead, so
+    each of two critical fixes doesn't misleadingly read "+0".
+    """
+    fixed = list(results)
+    fixed[index] = results[index].model_copy(update={"status": "pass"})
+    before, _, _ = score_results(results, critical_ids)
+    after, _, _ = score_results(fixed, critical_ids)
+    if after > before:
+        return after - before
+    raw_before, _, _ = score_results(results, critical_ids, apply_cap=False)
+    raw_after, _, _ = score_results(fixed, critical_ids, apply_cap=False)
+    return max(raw_after - raw_before, 0)
+
+
+def top_fixes(
+    results: list[CheckResult], critical_ids: set[str], limit: int = TOP_FIXES
+) -> list[TopFix]:
+    """
+    The highest-value fixes: failed and warned checks ranked by weight × severity ÷ effort.
+
+    Critical checks count double, since failing one caps the whole score. Each fix carries
+    the estimated "+N points" it would add on its own.
+    """
+    efforts = {spec.id: spec.effort for spec in REGISTRY}
+    candidates = []
+    for i, r in enumerate(results):
+        if r.status not in SEVERITY or not r.fix:
+            continue
+        effort = efforts.get(r.id, "hour")
+        priority = r.weight * SEVERITY[r.status] / EFFORT_COST[effort]
+        if r.id in critical_ids:
+            priority *= 2
+        points = _gain_if_fixed(results, i, critical_ids)
+        candidates.append((priority, points, r, effort))
+
+    candidates.sort(key=lambda c: (c[0], c[1]), reverse=True)
+    return [
+        TopFix(
+            check_id=r.id,
+            title=r.title,
+            category=r.category,
+            status=r.status,
+            effort=effort,
+            points=max(points, 1),
+            evidence=r.evidence,
+            fix=r.fix,
+            fix_language=r.fix_language,
+        )
+        for _, points, r, effort in candidates[:limit]
+    ]

@@ -4,25 +4,22 @@ import { downloadFile } from '../download'
 import { agentReadyTheme } from '../syntaxTheme'
 import CopyButton from './CopyButton'
 
-const TABS = [
-  { key: 'llms_txt', label: 'llms.txt', filename: 'llms.txt', language: 'markdown' },
-  { key: 'audit_md', label: 'Audit Report', filename: 'audit-report.md', language: 'markdown' },
-  { key: 'mcp_server_ts', label: 'MCP Server', filename: 'mcp_server.ts', language: 'typescript' },
-  { key: 'openapi_yaml', label: 'OpenAPI Spec', filename: 'openapi.yaml', language: 'yaml' },
-]
+// Prism grammar names for languages the API sends under a different name.
+const PRISM_LANGUAGE = { html: 'markup' }
 
-export default function ArtifactSection({ artifacts }) {
-  const [activeKey, setActiveKey] = useState(TABS[0].key)
+export default function ArtifactSection({ files, platform }) {
+  const [activeId, setActiveId] = useState(files[0]?.id)
 
-  const activeTab = TABS.find((t) => t.key === activeKey)
-  const content = artifacts[activeKey] || ''
+  const activeFile = files.find((f) => f.id === activeId) || files[0]
+  if (!activeFile) return null
+  const content = activeFile.content || ''
 
-  function handleTabChange(key) {
-    setActiveKey(key)
+  function handleTabChange(id) {
+    setActiveId(id)
   }
 
   function handleDownload() {
-    downloadFile(content, activeTab.filename)
+    downloadFile(content, activeFile.filename)
   }
 
   return (
@@ -31,31 +28,52 @@ export default function ArtifactSection({ artifacts }) {
         className="flex overflow-x-auto whitespace-nowrap border-b border-border-subtle"
         role="tablist"
       >
-        {TABS.map((tab) => {
-          const isActive = tab.key === activeKey
+        {files.map((file) => {
+          const isActive = file.id === activeFile.id
           return (
             <button
-              key={tab.key}
+              key={file.id}
               type="button"
               role="tab"
               aria-selected={isActive}
-              onClick={() => handleTabChange(tab.key)}
+              onClick={() => handleTabChange(file.id)}
               className={`border-b-2 px-4 py-2.5 font-ui text-[14px] font-medium transition-colors duration-100 ${
                 isActive
                   ? 'border-b-accent bg-bg-elevated text-text-primary'
                   : 'border-b-transparent text-text-muted hover:bg-bg-elevated/50 hover:text-text-secondary'
               }`}
             >
-              {tab.label}
+              {file.label}
+              {file.developer && (
+                <span className="ml-2 rounded border border-border-default px-1.5 py-px font-code text-[10px] text-text-muted">
+                  dev
+                </span>
+              )}
             </button>
           )
         })}
       </div>
 
-      <div className="flex h-11 items-center justify-between border-b border-border-subtle bg-bg-surface px-4">
-        <span className="font-code text-[13px] text-text-secondary">{activeTab.filename}</span>
-        <div className="flex gap-2">
-          <CopyButton key={activeKey} text={content} />
+      <div className="border-b border-border-subtle px-4 py-4">
+        <p className="font-ui text-[13px] text-text-secondary">{activeFile.description}</p>
+        {activeFile.how_to.length > 0 && (
+          <div className="mt-3">
+            <p className="font-ui text-[12px] font-medium uppercase tracking-wide text-text-muted">
+              How to add this{platform ? ` on ${platform.name}` : ''}
+            </p>
+            <ol className="mt-2 list-decimal space-y-1 pl-5 font-ui text-[13px] text-text-secondary marker:font-code marker:text-text-muted">
+              {activeFile.how_to.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </div>
+
+      <div className="flex h-11 items-center justify-between gap-2 border-b border-border-subtle bg-bg-surface px-4">
+        <span className="truncate font-code text-[13px] text-text-secondary">{activeFile.filename}</span>
+        <div className="flex shrink-0 gap-2">
+          <CopyButton key={activeFile.id} text={content} />
           <button
             type="button"
             onClick={handleDownload}
@@ -68,11 +86,11 @@ export default function ArtifactSection({ artifacts }) {
 
       <div
         role="region"
-        aria-label={`${activeTab.label} output`}
-        className="code-viewer min-h-[320px] max-h-[640px] overflow-auto bg-bg-panel md:min-h-[480px]"
+        aria-label={`${activeFile.label} output`}
+        className="code-viewer min-h-[240px] max-h-[640px] overflow-auto bg-bg-panel md:min-h-[360px]"
       >
         <SyntaxHighlighter
-          language={activeTab.language}
+          language={PRISM_LANGUAGE[activeFile.language] || activeFile.language}
           style={agentReadyTheme}
           showLineNumbers
           customStyle={{ margin: 0, padding: '16px 0', background: 'transparent' }}

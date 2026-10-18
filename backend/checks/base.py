@@ -31,9 +31,11 @@ class CheckSpec:
     applies: Optional[Callable[[SiteContext], bool]] = None
     na_reason: str = ""
     critical: bool = False
+    effort: str = "hour"  # "minutes" | "hour" | "dev" — how hard the fix is, for ranking
 
 
 REGISTRY: list[CheckSpec] = []
+EFFORTS = ("minutes", "hour", "dev")
 
 
 def check(
@@ -46,20 +48,24 @@ def check(
     applies: Optional[Callable[[SiteContext], bool]] = None,
     na_reason: str = "",
     critical: bool = False,
+    effort: str = "hour",
 ) -> Callable[[Callable[[SiteContext], Outcome]], Callable[[SiteContext], Outcome]]:
     """
     Decorator that registers a check function in REGISTRY (in definition order).
 
     A failing `critical` check caps the overall score: if AI can't reach or read the site,
-    nothing else matters.
+    nothing else matters. `effort` ("minutes", "hour" or "dev") ranks the fix in Top fixes.
     """
+    if effort not in EFFORTS:
+        raise ValueError(f"Unknown effort {effort!r} for check {id}")
 
     def register(fn: Callable[[SiteContext], Outcome]) -> Callable[[SiteContext], Outcome]:
         if any(spec.id == id for spec in REGISTRY):
             raise ValueError(f"Duplicate check id: {id}")
         REGISTRY.append(
             CheckSpec(
-                id, category, title, weight, why, fn, needs_website, applies, na_reason, critical
+                id, category, title, weight, why, fn, needs_website, applies, na_reason,
+                critical, effort,
             )
         )
         return fn

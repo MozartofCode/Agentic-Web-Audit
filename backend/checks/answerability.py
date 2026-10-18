@@ -71,6 +71,7 @@ def about_page(ctx: SiteContext) -> Outcome:
     weight=5,
     why="Agents booking, buying or asking on a customer's behalf need an email, phone number "
     "or contact page.",
+    effort="minutes",
 )
 def contact_info(ctx: SiteContext) -> Outcome:
     found: list[str] = []

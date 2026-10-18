@@ -66,7 +66,8 @@ def site_schema_nodes(ctx: SiteContext) -> list[dict]:
     return nodes
 
 
-def _meta(soup: BeautifulSoup, key: str) -> str:
+def meta_content(soup: BeautifulSoup, key: str) -> str:
+    """Content of <meta property=key> or <meta name=key>, or ""."""
     tag = soup.find("meta", attrs={"property": key}) or soup.find("meta", attrs={"name": key})
     return (tag.get("content") or "").strip() if tag else ""
 
@@ -74,7 +75,7 @@ def _meta(soup: BeautifulSoup, key: str) -> str:
 def site_name(ctx: SiteContext) -> str:
     """Best guess at the brand name, for fix snippets."""
     soup = ctx.home_soup
-    name = _meta(soup, "og:site_name")
+    name = meta_content(soup, "og:site_name")
     if not name and soup.title:
         name = re.split(r"\s[|·–—-]\s", soup.title.get_text(strip=True))[0]
     return name or ctx.origin.split("//", 1)[-1]
@@ -86,6 +87,7 @@ def site_name(ctx: SiteContext) -> str:
     "Page title is descriptive",
     weight=5,
     why="The <title> is the label AI and search engines use when they cite your page.",
+    effort="minutes",
 )
 def title_tag(ctx: SiteContext) -> Outcome:
     title = ctx.home_soup.title.get_text(strip=True) if ctx.home_soup.title else ""
@@ -104,9 +106,10 @@ def title_tag(ctx: SiteContext) -> Outcome:
     "Meta description summarizes the page",
     weight=5,
     why="AI systems often use the meta description as the one-line summary of who you are.",
+    effort="minutes",
 )
 def meta_description(ctx: SiteContext) -> Outcome:
-    desc = _meta(ctx.home_soup, "description")
+    desc = meta_content(ctx.home_soup, "description")
     fix = (
         '<meta name="description" content="One or two plain sentences: what you offer, '
         'who it is for, and where.">'
@@ -128,6 +131,7 @@ def meta_description(ctx: SiteContext) -> Outcome:
     weight=8,
     why="schema.org JSON-LD states facts — prices, hours, products, FAQs — in a form machines "
     "don't have to guess at.",
+    effort="minutes",
 )
 def json_ld(ctx: SiteContext) -> Outcome:
     types: list[str] = []
@@ -161,6 +165,7 @@ def json_ld(ctx: SiteContext) -> Outcome:
     weight=5,
     why="An Organization or LocalBusiness node tells AI your official name, logo, contact "
     "details and social profiles.",
+    effort="minutes",
 )
 def organization_schema(ctx: SiteContext) -> Outcome:
     for node in site_schema_nodes(ctx):
@@ -186,7 +191,8 @@ def organization_schema(ctx: SiteContext) -> Outcome:
         "name": site_name(ctx),
         "url": ctx.origin,
         "logo": f"{ctx.origin}/logo.png",
-        "description": _meta(ctx.home_soup, "description") or "What you do, in one sentence.",
+        "description": meta_content(ctx.home_soup, "description")
+        or "What you do, in one sentence.",
         "sameAs": ["https://www.linkedin.com/company/your-company"],
     }
     return Outcome(
@@ -204,10 +210,11 @@ def organization_schema(ctx: SiteContext) -> Outcome:
     weight=3,
     why="og:title / og:description / og:image control how links to you look in chats, "
     "assistants and social posts.",
+    effort="minutes",
 )
 def open_graph(ctx: SiteContext) -> Outcome:
     keys = ("og:title", "og:description", "og:image")
-    present = [k for k in keys if _meta(ctx.home_soup, k)]
+    present = [k for k in keys if meta_content(ctx.home_soup, k)]
     missing = [k for k in keys if k not in present]
     fix = "\n".join(
         f'<meta property="{k}" content="...">' for k in missing
@@ -226,6 +233,7 @@ def open_graph(ctx: SiteContext) -> Outcome:
     weight=2,
     why="A canonical link tells crawlers which URL is the real one, so duplicates don't split "
     "your signals.",
+    effort="minutes",
 )
 def canonical(ctx: SiteContext) -> Outcome:
     link = ctx.home_soup.find("link", rel=lambda r: r and "canonical" in r)
@@ -243,6 +251,7 @@ def canonical(ctx: SiteContext) -> Outcome:
     "Page language is declared",
     weight=2,
     why="The lang attribute tells AI which language to read and quote your content in.",
+    effort="minutes",
 )
 def html_lang(ctx: SiteContext) -> Outcome:
     html = ctx.home_soup.find("html")

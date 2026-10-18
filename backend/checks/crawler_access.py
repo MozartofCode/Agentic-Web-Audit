@@ -31,7 +31,8 @@ AI_BOT_INFO: tuple[tuple[str, str, str], ...] = (
 )
 
 
-def _sample_paths(ctx: SiteContext) -> list[str]:
+def sample_paths(ctx: SiteContext) -> list[str]:
+    """Paths of key pages and early sitemap URLs, to test robots.txt rules beyond '/'."""
     urls = [page.url for page in ctx.pages.values()] + ctx.sitemap_urls[:MAX_SAMPLE_PATHS]
     paths = [urlparse(u).path or "/" for u in urls]
     return [p for p in dict.fromkeys(paths) if p != "/"][:MAX_SAMPLE_PATHS]
@@ -50,7 +51,7 @@ def crawler_access_matrix(ctx: SiteContext) -> list[CrawlerAccess]:
 
     parser = RobotFileParser()
     parser.parse(ctx.robots_txt.splitlines())
-    paths = _sample_paths(ctx)
+    paths = sample_paths(ctx)
 
     matrix = []
     for bot, owner, purpose in AI_BOT_INFO:
@@ -74,6 +75,7 @@ def crawler_access_matrix(ctx: SiteContext) -> list[CrawlerAccess]:
     "robots.txt is published",
     weight=2,
     why="robots.txt is where crawlers look first for your rules and your sitemap.",
+    effort="minutes",
 )
 def robots_txt(ctx: SiteContext) -> Outcome:
     if ctx.robots_txt.strip():
@@ -96,6 +98,7 @@ def robots_txt(ctx: SiteContext) -> Outcome:
     why="When someone asks ChatGPT, Claude or Perplexity about you, these bots fetch your "
     "pages live. Blocked = the assistant answers from guesses or competitors.",
     critical=True,
+    effort="minutes",
 )
 def answer_bots_allowed(ctx: SiteContext) -> Outcome:
     answer_bots = [e for e in crawler_access_matrix(ctx) if e.purpose in ("search", "user")]
@@ -121,6 +124,7 @@ def answer_bots_allowed(ctx: SiteContext) -> Outcome:
     weight=8,
     why="Many CDNs (e.g. Cloudflare's AI-bot blocking) reject AI crawlers before robots.txt "
     "is even read.",
+    effort="minutes",
 )
 def cdn_bot_blocking(ctx: SiteContext) -> Outcome:
     probe = ctx.bot_probe
@@ -147,6 +151,7 @@ def cdn_bot_blocking(ctx: SiteContext) -> Outcome:
     weight=8,
     why="A noindex or nosnippet directive tells search and AI systems not to show or quote "
     "the page.",
+    effort="minutes",
 )
 def robots_meta(ctx: SiteContext) -> Outcome:
     directives: list[str] = []

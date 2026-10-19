@@ -9,8 +9,9 @@ from fastapi import HTTPException
 from groq import AsyncGroq
 from pydantic import ValidationError
 
+from blind_reader import verify_preview
 from models import ProductAnalysis
-from prompts import SYSTEM_PROMPT, build_analysis_prompt
+from prompts import SYSTEM_PROMPT, build_analysis_prompt, prompt_texts
 
 logger = logging.getLogger(__name__)
 
@@ -58,8 +59,6 @@ async def analyze_product(
             status_code=500, detail="AI returned an unexpected format. Please try again."
         )
 
-    scanned = ([website_data["url"]] if website_data.get("url") else []) + [
-        p["url"] for p in pages
-    ]
-    analysis.ai_preview = analysis.ai_preview.grounded_in(scanned)
+    texts = prompt_texts(website_data, pages)
+    analysis.ai_preview = verify_preview(analysis.ai_preview.cleaned(), texts)
     return analysis

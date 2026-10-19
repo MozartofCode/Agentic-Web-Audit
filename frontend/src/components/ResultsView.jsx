@@ -1,5 +1,6 @@
 import AIPreviewCard from './AIPreviewCard'
 import ArtifactSection from './ArtifactSection'
+import BlindReaderCard from './BlindReaderCard'
 import CheckList from './CheckList'
 import CrawlerMatrix from './CrawlerMatrix'
 import ReportStatus from './ReportStatus'
@@ -53,6 +54,12 @@ export default function ResultsView({ results, onRescan, onCompare, onOpenReport
       {audit.top_fixes.length > 0 && (
         <div className="mt-6">
           <TopFixes fixes={audit.top_fixes} />
+        </div>
+      )}
+
+      {results.ai_preview.questions.length > 0 && (
+        <div className="mt-6">
+          <BlindReaderCard questions={results.ai_preview.questions} />
         </div>
       )}
 

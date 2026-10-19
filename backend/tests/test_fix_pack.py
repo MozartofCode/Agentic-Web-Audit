@@ -67,27 +67,16 @@ def bakery_site(**fields: object) -> SiteContext:
 # --- AI preview -----------------------------------------------------------------------------
 
 
-def test_ai_preview_drops_sources_that_were_never_scanned() -> None:
+def test_ai_preview_cleaned_trims_and_caps() -> None:
     preview = AIPreview(
         summary=" Tartine is a bakery. ",
         unknowns=[AIUnknown(fact="Opening hours", fix="List hours"), AIUnknown(fact=" ")],
-        questions=[
-            AIQuestion(question="Do they deliver?", answered=True, answer="Yes, citywide.",
-                       source=ORIGIN + "/about/"),
-            AIQuestion(question="Is it vegan?", answered=True, answer="Maybe",
-                       source="https://elsewhere.example/vegan"),
-            AIQuestion(question="Hours?", answered=False, answer="9-5", source=""),
-        ]
-        + [AIQuestion(question=f"Q{i}?") for i in range(10)],
+        questions=[AIQuestion(id=f"q{i}") for i in range(10)],
     )
-    grounded = preview.grounded_in([ORIGIN + "/", ORIGIN + "/about"])
-    assert grounded.summary == "Tartine is a bakery."
-    assert [u.fact for u in grounded.unknowns] == ["Opening hours"]
-    assert len(grounded.questions) == 8
-    deliver, vegan, hours = grounded.questions[:3]
-    assert deliver.answered and deliver.source == ORIGIN + "/about/"
-    assert not vegan.answered and vegan.source == "" and vegan.answer == ""
-    assert not hours.answered and hours.answer == ""
+    cleaned = preview.cleaned()
+    assert cleaned.summary == "Tartine is a bakery."
+    assert [u.fact for u in cleaned.unknowns] == ["Opening hours"]
+    assert len(cleaned.questions) == 8
 
 
 def test_ai_preview_defaults_when_llm_omits_it() -> None:
@@ -102,7 +91,8 @@ def test_prompt_includes_key_pages_for_citation() -> None:
     assert {e["kind"] for e in excerpts} == {"pricing", "about"}
     prompt = build_analysis_prompt({"url": site.url, "title": "Tartine"}, {}, excerpts)
     assert ORIGIN + "/pricing" in prompt and "Country loaf $6" in prompt
-    assert '"ai_preview"' in prompt and "exactly 8 questions" in prompt
+    assert '"ai_preview"' in prompt
+    assert '"price": How much does it cost?' in prompt and "copied\n  EXACTLY" in prompt
 
 
 # --- Top fixes ------------------------------------------------------------------------------
@@ -117,9 +107,10 @@ def test_top_fixes_ranked_with_points() -> None:
     fixes = audit.top_fixes
     assert 1 <= len(fixes) <= 5
     assert all(f.status in ("warn", "fail") and f.fix and f.points >= 1 for f in fixes)
-    # Quick, heavy fixes (e.g. llms.txt, 8 pts, 5 minutes) outrank slow light ones.
+    # Ranked by impact: llms.txt is a low-weight proposal now and must not lead the list,
+    # and slow light fixes stay out of the top five.
     ids = [f.check_id for f in fixes]
-    assert "llms_txt" in ids
+    assert ids[0] != "llms_txt"
     assert "heading_structure" not in ids
 
 
@@ -326,8 +317,9 @@ def test_llms_txt_fix_upgraded_everywhere() -> None:
     pack = build_fix_pack(site, analysis(), audit, ARTIFACTS)
     upgrade_check_fixes(audit, pack)
     check = next(c for c in audit.checks if c.id == "llms_txt")
-    top = next(f for f in audit.top_fixes if f.check_id == "llms_txt")
-    assert check.fix == top.fix and "> Neighborhood sourdough bakery" in check.fix
+    assert "> Neighborhood sourdough bakery" in check.fix
+    top = next((f for f in audit.top_fixes if f.check_id == "llms_txt"), None)
+    assert top is None or top.fix == check.fix
 
 
 def test_fix_pack_developer_track_adds_openapi_and_mcp() -> None:

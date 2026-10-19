@@ -39,9 +39,10 @@ def llms_txt_template(ctx: SiteContext) -> str:
     "llms_txt",
     CATEGORY,
     "llms.txt guides AI to your content",
-    weight=8,
-    why="/llms.txt is a short markdown map of your site written for language models — the "
-    "fastest way to tell an AI what matters.",
+    weight=2,
+    why="/llms.txt is a proposed standard: a short markdown map of your site for language "
+    "models. Coding assistants and some AI tools read it, but the big AI search crawlers "
+    "rarely request it today, so it's cheap to add with a modest payoff.",
     effort="minutes",
 )
 def llms_txt(ctx: SiteContext) -> Outcome:
@@ -69,7 +70,7 @@ def llms_txt(ctx: SiteContext) -> Outcome:
     "llms_full_txt",
     CATEGORY,
     "llms-full.txt offers the full content",
-    weight=2,
+    weight=1,
     why="Optional companion to llms.txt with your full docs/content in one file, so AI can "
     "read everything in a single request.",
 )

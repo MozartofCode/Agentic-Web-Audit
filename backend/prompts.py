@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from blind_reader import BLIND_QUESTIONS
+
 SYSTEM_PROMPT = """You are an expert at analyzing websites, software products and APIs, and at
 predicting how AI assistants (ChatGPT, Claude, Perplexity) would describe them.
 You will be given content scraped from a website and/or GitHub repository.
@@ -10,6 +12,41 @@ Return ONLY valid JSON. No explanation. No markdown. No code fences. Just JSON."
 
 MAX_PAGE_CHARS = 1500
 MAX_HOMEPAGE_CHARS = 3000
+
+
+def homepage_text(website_data: dict) -> str:
+    """Homepage main text plus its footer (contact details), within MAX_HOMEPAGE_CHARS."""
+    footer = website_data.get("footer_text", "")
+    room = MAX_HOMEPAGE_CHARS - (len(footer) + 9 if footer else 0)
+    body = website_data.get("body_text", "")[:room]
+    return f"{body} Footer: {footer}" if footer else body
+
+
+def prompt_texts(website_data: dict, pages: list[dict]) -> dict[str, str]:
+    """
+    URL → the exact page text the model is shown (truncated as in the prompt).
+
+    The blind-reader check verifies quotes against this, so it must match the prompt.
+    """
+    texts: dict[str, str] = {}
+    # The prompt shows the homepage title, meta description and headings on their own lines;
+    # they're real text in the raw HTML, so quotes from them count too.
+    shown = [
+        website_data.get("title", ""),
+        website_data.get("description", ""),
+        " | ".join(website_data.get("headings", [])[:10]),
+        homepage_text(website_data),
+    ]
+    text = " ".join(part for part in shown if part)
+    if website_data.get("url") and text.strip():
+        texts[website_data["url"]] = text
+    for page in pages:
+        texts.setdefault(page["url"], page["text"][:MAX_PAGE_CHARS])
+    return texts
+
+
+def _questions_block() -> str:
+    return "\n".join(f'  - "{qid}": {question}' for qid, question in BLIND_QUESTIONS)
 
 
 def _pages_block(pages: list[dict]) -> str:
@@ -48,7 +85,7 @@ def build_analysis_prompt(
   "ai_preview": {{
     "summary": "string",
     "unknowns": [{{"fact": "string", "fix": "string"}}],
-    "questions": [{{"question": "string", "answered": true, "answer": "string", "source": "URL"}}]
+    "questions": [{{"id": "price", "answered": true, "answer": "string", "quote": "string", "source": "URL"}}]
   }}
 }}
 
@@ -60,21 +97,22 @@ Rules for "ai_preview" (this shows the site owner how an AI assistant would see 
   (e.g. "Pricing", "Location / service area", "Who it is for", "How to sign up or buy",
   "Opening hours", "Contact details"). "fix" is one short instruction, e.g.
   "State plan prices as text on your pricing page". Empty list if nothing important is missing.
-- "questions": exactly 8 questions real customers most often ask an AI assistant about a
-  business of this type (typically: what it costs, where / when, who it is for, how to buy or
-  sign up, how to contact, policies, how it compares). Choose them by how often customers ask,
-  NOT by whether the pages answer them. "answered" is true ONLY if the pages below clearly
-  answer it. Then
-  "answer" is the answer in at most 25 words, using facts from that page, and "source" is the
-  exact URL (copied from the list below) of the page that answers it. If not answered:
-  "answered": false, "answer": "", "source": "".
+- "questions": one entry for EACH of these fixed question ids, about this business:
+{_questions_block()}
+  Answer ONLY from the page text below (it is exactly what an AI crawler that doesn't run
+  JavaScript receives). "answered" is true ONLY if the text clearly answers the question.
+  Then "answer" is the answer in at most 25 words, "quote" is 6-30 consecutive words copied
+  EXACTLY, character for character, from the page text that supports the answer, and
+  "source" is the exact URL (copied from the list below) of the page the quote is from.
+  The quote is checked automatically; an inexact quote counts as not answered.
+  If not answered: "answered": false, "answer": "", "quote": "", "source": "".
 
 --- WEBSITE HOMEPAGE ---
 URL: {homepage_url}
 Title: {website_data.get('title', 'N/A')}
 Description: {website_data.get('description', 'N/A')}
 Headings: {' | '.join(website_data.get('headings', [])[:10])}
-Body: {website_data.get('body_text', 'N/A')[:MAX_HOMEPAGE_CHARS]}
+Body: {homepage_text(website_data) or 'N/A'}
 
 --- OTHER KEY PAGES ---
 {_pages_block(pages)}

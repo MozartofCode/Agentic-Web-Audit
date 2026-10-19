@@ -35,6 +35,7 @@ MAX_TEXT_FILE_BYTES = 500_000
 MAX_SITEMAP_URLS = 500
 MAX_KEY_PAGE_DEPTH = 3
 MAX_EXCERPT_CHARS = 2000
+MAX_FOOTER_CHARS = 600
 LOCALE_SEGMENT = re.compile(r"^[a-z]{2}(?:[-_][a-z]{2,4})?$")
 
 BROWSER_UA = (
@@ -468,7 +469,12 @@ def is_challenge_page(page: FetchedPage) -> bool:
 def website_data_from_context(ctx: SiteContext) -> dict:
     """The homepage summary dict the LLM prompt and legacy artifact generators expect."""
     soup = BeautifulSoup(ctx.homepage.text if ctx.homepage else "", "html.parser")
-    for tag in soup(["script", "style", "nav", "footer", "noscript"]):
+    for tag in soup(["script", "style", "noscript"]):
+        tag.decompose()
+    # The footer is boilerplate for the summary, but it's where contact details and addresses
+    # usually live, so keep a short copy for the blind-reader questions.
+    footer_text = " ".join(f.get_text(" ", strip=True) for f in soup.find_all("footer"))
+    for tag in soup(["nav", "footer"]):
         tag.decompose()
     title = soup.find("title")
     return {
@@ -478,6 +484,7 @@ def website_data_from_context(ctx: SiteContext) -> dict:
         "headings": [h.get_text(strip=True) for h in soup.find_all(["h1", "h2", "h3"])[:20]],
         "api_links": find_api_links(soup, ctx.url),
         "body_text": soup.get_text(separator=" ", strip=True)[:MAX_BODY_CHARS],
+        "footer_text": footer_text[:MAX_FOOTER_CHARS],
         "has_llms_txt": looks_like_llms_txt(ctx.llms_txt),
         "blocked_ai_bots": blocked_ai_bots(ctx.robots_txt) if ctx.robots_txt else [],
     }

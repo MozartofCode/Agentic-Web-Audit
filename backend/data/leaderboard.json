@@ -1,100 +1,119 @@
 {
-  "generated_at": "2026-10-18T23:21:07+00:00",
+  "generated_at": "2026-10-19T22:29:04+00:00",
   "entries": [
+    {
+      "domain": "openai.com",
+      "url": "https://openai.com/",
+      "category": "AI",
+      "overall": 74,
+      "grade": "C",
+      "categories": {
+        "crawler": 88,
+        "rendering": 81,
+        "structured": 56,
+        "agent": 88,
+        "answerability": 57,
+        "developer": 54
+      },
+      "has_llms_txt": false,
+      "blocked_answer_bots": [],
+      "critical_failures": [],
+      "scanned_at": "2026-10-19T22:27:12+00:00"
+    },
     {
       "domain": "anthropic.com",
       "url": "https://www.anthropic.com/",
       "category": "AI",
-      "overall": 79,
-      "grade": "C",
+      "overall": 80,
+      "grade": "B",
       "categories": {
         "crawler": 100,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 56,
-        "agent": 68,
+        "agent": 88,
         "answerability": 86,
         "developer": 24
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:02+00:00"
+      "scanned_at": "2026-10-19T22:27:10+00:00"
     },
     {
       "domain": "huggingface.co",
       "url": "https://huggingface.co/",
       "category": "AI",
-      "overall": 82,
+      "overall": 84,
       "grade": "B",
       "categories": {
         "crawler": 97,
         "rendering": 100,
         "structured": 53,
-        "agent": 50,
+        "agent": 64,
         "answerability": 93,
         "developer": null
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:02+00:00"
+      "scanned_at": "2026-10-19T22:27:12+00:00"
     },
     {
       "domain": "mistral.ai",
       "url": "https://mistral.ai/",
       "category": "AI",
-      "overall": 90,
-      "grade": "A",
+      "overall": 88,
+      "grade": "B",
       "categories": {
         "crawler": 100,
-        "rendering": 81,
+        "rendering": 74,
         "structured": 95,
-        "agent": 80,
+        "agent": 76,
         "answerability": 93,
         "developer": null
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:04+00:00"
+      "scanned_at": "2026-10-19T22:27:18+00:00"
     },
     {
       "domain": "cohere.com",
       "url": "https://cohere.com/",
       "category": "AI",
-      "overall": 91,
+      "overall": 93,
       "grade": "A",
       "categories": {
         "crawler": 100,
         "rendering": 100,
         "structured": 95,
-        "agent": 78,
+        "agent": 91,
         "answerability": 100,
         "developer": 50
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:04+00:00"
+      "scanned_at": "2026-10-19T22:27:17+00:00"
     },
     {
       "domain": "stripe.com",
       "url": "https://stripe.com/",
       "category": "Developer tools",
-      "overall": 93,
+      "overall": 91,
       "grade": "A",
       "categories": {
         "crawler": 97,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 95,
-        "agent": 88,
+        "agent": 86,
         "answerability": 100,
         "developer": 60
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:06+00:00"
+      "scanned_at": "2026-10-19T22:27:20+00:00"
     },
     {
       "domain": "github.com",
@@ -113,93 +132,93 @@
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:09+00:00"
+      "scanned_at": "2026-10-19T22:27:21+00:00"
     },
     {
       "domain": "vercel.com",
       "url": "https://vercel.com/",
       "category": "Developer tools",
-      "overall": 96,
+      "overall": 95,
       "grade": "A",
       "categories": {
         "crawler": 100,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 92,
-        "agent": 96,
+        "agent": 98,
         "answerability": 89,
         "developer": 92
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:08+00:00"
+      "scanned_at": "2026-10-19T22:27:25+00:00"
     },
     {
       "domain": "supabase.com",
       "url": "https://supabase.com/",
       "category": "Developer tools",
-      "overall": 95,
+      "overall": 94,
       "grade": "A",
       "categories": {
         "crawler": 100,
         "rendering": 94,
         "structured": 95,
-        "agent": 91,
+        "agent": 88,
         "answerability": 100,
         "developer": 82
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:08+00:00"
+      "scanned_at": "2026-10-19T22:27:25+00:00"
     },
     {
       "domain": "cloudflare.com",
       "url": "https://www.cloudflare.com/",
       "category": "Developer tools",
-      "overall": 93,
+      "overall": 91,
       "grade": "A",
       "categories": {
         "crawler": 100,
-        "rendering": 94,
+        "rendering": 87,
         "structured": 95,
-        "agent": 82,
+        "agent": 76,
         "answerability": 93,
         "developer": 90
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:13+00:00"
+      "scanned_at": "2026-10-19T22:27:27+00:00"
     },
     {
       "domain": "twilio.com",
       "url": "https://www.twilio.com/en-us",
       "category": "Developer tools",
-      "overall": 88,
+      "overall": 89,
       "grade": "B",
       "categories": {
         "crawler": 94,
         "rendering": 100,
         "structured": 88,
-        "agent": 73,
+        "agent": 81,
         "answerability": 100,
         "developer": 54
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:12+00:00"
+      "scanned_at": "2026-10-19T22:27:38+00:00"
     },
     {
       "domain": "postman.com",
       "url": "https://www.postman.com/",
       "category": "Developer tools",
-      "overall": 100,
+      "overall": 98,
       "grade": "A",
       "categories": {
         "crawler": 100,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 100,
         "agent": 100,
         "answerability": 100,
@@ -208,64 +227,64 @@
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:13+00:00"
+      "scanned_at": "2026-10-19T22:27:32+00:00"
     },
     {
       "domain": "netlify.com",
       "url": "https://www.netlify.com/",
       "category": "Developer tools",
-      "overall": 97,
+      "overall": 98,
       "grade": "A",
       "categories": {
         "crawler": 100,
         "rendering": 93,
         "structured": 100,
-        "agent": 96,
+        "agent": 98,
         "answerability": 100,
         "developer": 92
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:15+00:00"
+      "scanned_at": "2026-10-19T22:27:34+00:00"
     },
     {
       "domain": "python.org",
       "url": "https://www.python.org/",
       "category": "Developer tools",
-      "overall": 85,
+      "overall": 88,
       "grade": "B",
       "categories": {
         "crawler": 88,
         "rendering": 100,
         "structured": 77,
-        "agent": 68,
+        "agent": 88,
         "answerability": 86,
         "developer": null
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:14+00:00"
+      "scanned_at": "2026-10-19T22:27:35+00:00"
     },
     {
       "domain": "notion.com",
       "url": "https://www.notion.com/",
       "category": "SaaS",
-      "overall": 92,
+      "overall": 93,
       "grade": "A",
       "categories": {
         "crawler": 97,
         "rendering": 100,
         "structured": 100,
-        "agent": 96,
+        "agent": 98,
         "answerability": 89,
         "developer": 54
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:16+00:00"
+      "scanned_at": "2026-10-19T22:27:40+00:00"
     },
     {
       "domain": "slack.com",
@@ -277,14 +296,14 @@
         "crawler": 97,
         "rendering": 100,
         "structured": 53,
-        "agent": 96,
+        "agent": 98,
         "answerability": 100,
         "developer": 54
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:17+00:00"
+      "scanned_at": "2026-10-19T22:27:39+00:00"
     },
     {
       "domain": "figma.com",
@@ -294,9 +313,9 @@
       "grade": "F",
       "categories": {
         "crawler": 71,
-        "rendering": 94,
+        "rendering": 87,
         "structured": 100,
-        "agent": 59,
+        "agent": 76,
         "answerability": 100,
         "developer": 44
       },
@@ -311,112 +330,131 @@
       "critical_failures": [
         "AI assistants may read your pages"
       ],
-      "scanned_at": "2026-10-18T23:20:20+00:00"
+      "scanned_at": "2026-10-19T22:27:48+00:00"
     },
     {
       "domain": "linear.app",
       "url": "https://linear.app/",
       "category": "SaaS",
-      "overall": 88,
+      "overall": 87,
       "grade": "B",
       "categories": {
         "crawler": 100,
-        "rendering": 94,
+        "rendering": 87,
         "structured": 80,
-        "agent": 88,
+        "agent": 86,
         "answerability": 100,
         "developer": 44
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:18+00:00"
+      "scanned_at": "2026-10-19T22:27:47+00:00"
     },
     {
       "domain": "atlassian.com",
       "url": "https://www.atlassian.com/",
       "category": "SaaS",
-      "overall": 88,
+      "overall": 86,
       "grade": "B",
       "categories": {
         "crawler": 100,
-        "rendering": 81,
+        "rendering": 74,
         "structured": 100,
-        "agent": 91,
+        "agent": 88,
         "answerability": 86,
         "developer": 48
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:25+00:00"
+      "scanned_at": "2026-10-19T22:27:52+00:00"
     },
     {
       "domain": "hubspot.com",
       "url": "https://www.hubspot.com/",
       "category": "SaaS",
-      "overall": 88,
+      "overall": 86,
       "grade": "B",
       "categories": {
         "crawler": 94,
-        "rendering": 100,
+        "rendering": 85,
         "structured": 100,
-        "agent": 96,
+        "agent": 98,
         "answerability": 86,
         "developer": 24
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:24+00:00"
+      "scanned_at": "2026-10-19T22:27:58+00:00"
     },
     {
       "domain": "zoom.com",
       "url": "https://www.zoom.com",
       "category": "SaaS",
-      "overall": 85,
+      "overall": 88,
       "grade": "B",
       "categories": {
         "crawler": 97,
         "rendering": 100,
         "structured": 100,
-        "agent": 68,
+        "agent": 88,
         "answerability": 80,
         "developer": 34
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:22+00:00"
+      "scanned_at": "2026-10-19T22:27:54+00:00"
     },
     {
       "domain": "dropbox.com",
       "url": "https://www.dropbox.com/",
       "category": "SaaS",
-      "overall": 93,
+      "overall": 91,
       "grade": "A",
       "categories": {
         "crawler": 100,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 100,
-        "agent": 88,
+        "agent": 86,
         "answerability": 100,
         "developer": 48
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:26+00:00"
+      "scanned_at": "2026-10-19T22:27:57+00:00"
+    },
+    {
+      "domain": "canva.com",
+      "url": "https://www.canva.com/",
+      "category": "SaaS",
+      "overall": 82,
+      "grade": "B",
+      "categories": {
+        "crawler": 85,
+        "rendering": 100,
+        "structured": 100,
+        "agent": 64,
+        "answerability": 75,
+        "developer": 44
+      },
+      "has_llms_txt": false,
+      "blocked_answer_bots": [],
+      "critical_failures": [],
+      "scanned_at": "2026-10-19T22:28:05+00:00"
     },
     {
       "domain": "shopify.com",
       "url": "https://www.shopify.com/",
       "category": "E-commerce",
-      "overall": 93,
+      "overall": 92,
       "grade": "A",
       "categories": {
         "crawler": 94,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 100,
         "agent": 100,
         "answerability": 100,
@@ -425,19 +463,19 @@
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:28+00:00"
+      "scanned_at": "2026-10-19T22:28:02+00:00"
     },
     {
       "domain": "amazon.com",
       "url": "https://www.amazon.com/",
       "category": "E-commerce",
-      "overall": 36,
+      "overall": 40,
       "grade": "F",
       "categories": {
         "crawler": 56,
         "rendering": 32,
         "structured": 6,
-        "agent": 44,
+        "agent": 72,
         "answerability": 27,
         "developer": null
       },
@@ -454,45 +492,45 @@
         "AI assistants may read your pages",
         "Content is in the HTML, not only in JavaScript"
       ],
-      "scanned_at": "2026-10-18T23:20:32+00:00"
+      "scanned_at": "2026-10-19T22:28:01+00:00"
     },
     {
       "domain": "ikea.com",
       "url": "https://www.ikea.com/",
       "category": "E-commerce",
-      "overall": 88,
-      "grade": "B",
+      "overall": 90,
+      "grade": "A",
       "categories": {
         "crawler": 100,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 100,
-        "agent": 61,
+        "agent": 84,
         "answerability": 68,
         "developer": null
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:30+00:00"
+      "scanned_at": "2026-10-19T22:28:08+00:00"
     },
     {
       "domain": "nike.com",
       "url": "https://www.nike.com/",
       "category": "E-commerce",
-      "overall": 87,
+      "overall": 89,
       "grade": "B",
       "categories": {
         "crawler": 88,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 95,
-        "agent": 68,
+        "agent": 88,
         "answerability": 80,
         "developer": null
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:36+00:00"
+      "scanned_at": "2026-10-19T22:28:16+00:00"
     },
     {
       "domain": "squarespace.com",
@@ -504,90 +542,90 @@
         "crawler": 100,
         "rendering": 100,
         "structured": 88,
-        "agent": 79,
+        "agent": 74,
         "answerability": 100,
         "developer": 24
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:39+00:00"
+      "scanned_at": "2026-10-19T22:28:17+00:00"
     },
     {
       "domain": "wix.com",
       "url": "https://www.wix.com/",
       "category": "Website builders",
-      "overall": 84,
+      "overall": 87,
       "grade": "B",
       "categories": {
-        "crawler": 76,
-        "rendering": 94,
+        "crawler": 100,
+        "rendering": 81,
         "structured": 100,
-        "agent": 79,
+        "agent": 74,
         "answerability": 100,
         "developer": 44
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:42+00:00"
+      "scanned_at": "2026-10-19T22:28:24+00:00"
     },
     {
       "domain": "webflow.com",
       "url": "https://webflow.com/",
       "category": "Website builders",
-      "overall": 89,
+      "overall": 88,
       "grade": "B",
       "categories": {
         "crawler": 97,
         "rendering": 100,
         "structured": 88,
-        "agent": 73,
+        "agent": 67,
         "answerability": 100,
         "developer": 54
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:41+00:00"
+      "scanned_at": "2026-10-19T22:28:21+00:00"
     },
     {
       "domain": "wordpress.com",
       "url": "https://wordpress.com/",
       "category": "Website builders",
-      "overall": 88,
+      "overall": 87,
       "grade": "B",
       "categories": {
         "crawler": 88,
         "rendering": 100,
         "structured": 100,
-        "agent": 88,
+        "agent": 86,
         "answerability": 100,
         "developer": 24
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:47+00:00"
+      "scanned_at": "2026-10-19T22:28:25+00:00"
     },
     {
       "domain": "framer.com",
       "url": "https://www.framer.com/",
       "category": "Website builders",
-      "overall": 87,
+      "overall": 85,
       "grade": "B",
       "categories": {
         "crawler": 91,
-        "rendering": 94,
+        "rendering": 87,
         "structured": 95,
-        "agent": 79,
+        "agent": 74,
         "answerability": 100,
         "developer": 44
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:45+00:00"
+      "scanned_at": "2026-10-19T22:28:30+00:00"
     },
     {
       "domain": "theguardian.com",
@@ -599,7 +637,7 @@
         "crawler": 71,
         "rendering": 76,
         "structured": 79,
-        "agent": 68,
+        "agent": 88,
         "answerability": 77,
         "developer": null
       },
@@ -612,7 +650,7 @@
       "critical_failures": [
         "AI assistants may read your pages"
       ],
-      "scanned_at": "2026-10-18T23:20:48+00:00"
+      "scanned_at": "2026-10-19T22:28:33+00:00"
     },
     {
       "domain": "bbc.com",
@@ -624,7 +662,7 @@
         "crawler": 71,
         "rendering": 81,
         "structured": 76,
-        "agent": 57,
+        "agent": 74,
         "answerability": 70,
         "developer": null
       },
@@ -638,7 +676,7 @@
       "critical_failures": [
         "AI assistants may read your pages"
       ],
-      "scanned_at": "2026-10-18T23:20:49+00:00"
+      "scanned_at": "2026-10-19T22:28:34+00:00"
     },
     {
       "domain": "theverge.com",
@@ -650,7 +688,7 @@
         "crawler": 68,
         "rendering": 81,
         "structured": 80,
-        "agent": 61,
+        "agent": 79,
         "answerability": 93,
         "developer": 56
       },
@@ -665,121 +703,121 @@
       "critical_failures": [
         "AI assistants may read your pages"
       ],
-      "scanned_at": "2026-10-18T23:20:51+00:00"
+      "scanned_at": "2026-10-19T22:28:37+00:00"
     },
     {
       "domain": "wikipedia.org",
       "url": "https://www.wikipedia.org/",
       "category": "News & media",
-      "overall": 77,
-      "grade": "C",
+      "overall": 80,
+      "grade": "B",
       "categories": {
         "crawler": 88,
         "rendering": 100,
         "structured": 50,
-        "agent": 68,
+        "agent": 88,
         "answerability": 64,
         "developer": null
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:52+00:00"
+      "scanned_at": "2026-10-19T22:28:39+00:00"
     },
     {
       "domain": "paypal.com",
       "url": "https://www.paypal.com/us/home",
       "category": "Finance",
-      "overall": 83,
+      "overall": 84,
       "grade": "B",
       "categories": {
         "crawler": 97,
         "rendering": 100,
         "structured": 92,
-        "agent": 59,
+        "agent": 62,
         "answerability": 93,
         "developer": 24
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:55+00:00"
+      "scanned_at": "2026-10-19T22:28:43+00:00"
     },
     {
       "domain": "wise.com",
       "url": "https://wise.com/",
       "category": "Finance",
-      "overall": 86,
+      "overall": 87,
       "grade": "B",
       "categories": {
         "crawler": 97,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 88,
-        "agent": 59,
+        "agent": 76,
         "answerability": 100,
         "developer": 50
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:55+00:00"
+      "scanned_at": "2026-10-19T22:28:46+00:00"
     },
     {
       "domain": "coinbase.com",
       "url": "https://www.coinbase.com/",
       "category": "Finance",
-      "overall": 90,
-      "grade": "A",
+      "overall": 89,
+      "grade": "B",
       "categories": {
         "crawler": 88,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 92,
-        "agent": 91,
+        "agent": 88,
         "answerability": 100,
         "developer": 60
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:57+00:00"
+      "scanned_at": "2026-10-19T22:28:50+00:00"
     },
     {
       "domain": "robinhood.com",
       "url": "https://robinhood.com/us/en/",
       "category": "Finance",
-      "overall": 86,
+      "overall": 89,
       "grade": "B",
       "categories": {
         "crawler": 97,
         "rendering": 100,
         "structured": 56,
-        "agent": 62,
+        "agent": 81,
         "answerability": 100,
         "developer": null
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:20:58+00:00"
+      "scanned_at": "2026-10-19T22:28:52+00:00"
     },
     {
       "domain": "airbnb.com",
       "url": "https://www.airbnb.com/",
       "category": "Travel",
-      "overall": 78,
+      "overall": 79,
       "grade": "C",
       "categories": {
         "crawler": 75,
-        "rendering": 94,
+        "rendering": 87,
         "structured": 92,
-        "agent": 54,
+        "agent": 69,
         "answerability": 70,
         "developer": null
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:21:01+00:00"
+      "scanned_at": "2026-10-19T22:28:56+00:00"
     },
     {
       "domain": "booking.com",
@@ -791,7 +829,7 @@
         "crawler": 100,
         "rendering": 55,
         "structured": 18,
-        "agent": 44,
+        "agent": 72,
         "answerability": 27,
         "developer": null
       },
@@ -800,7 +838,7 @@
       "critical_failures": [
         "Content is in the HTML, not only in JavaScript"
       ],
-      "scanned_at": "2026-10-18T23:21:02+00:00"
+      "scanned_at": "2026-10-19T22:28:58+00:00"
     },
     {
       "domain": "duolingo.com",
@@ -812,7 +850,7 @@
         "crawler": 97,
         "rendering": 32,
         "structured": 41,
-        "agent": 38,
+        "agent": 61,
         "answerability": 27,
         "developer": null
       },
@@ -821,7 +859,7 @@
       "critical_failures": [
         "Content is in the HTML, not only in JavaScript"
       ],
-      "scanned_at": "2026-10-18T23:21:03+00:00"
+      "scanned_at": "2026-10-19T22:28:58+00:00"
     },
     {
       "domain": "khanacademy.org",
@@ -833,7 +871,7 @@
         "crawler": 100,
         "rendering": 32,
         "structured": 27,
-        "agent": 44,
+        "agent": 72,
         "answerability": 27,
         "developer": null
       },
@@ -842,77 +880,69 @@
       "critical_failures": [
         "Content is in the HTML, not only in JavaScript"
       ],
-      "scanned_at": "2026-10-18T23:21:04+00:00"
+      "scanned_at": "2026-10-19T22:29:01+00:00"
     },
     {
       "domain": "coursera.org",
       "url": "https://www.coursera.org/",
       "category": "Education & nonprofit",
-      "overall": 91,
+      "overall": 90,
       "grade": "A",
       "categories": {
         "crawler": 97,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 92,
-        "agent": 96,
+        "agent": 98,
         "answerability": 86,
         "developer": 56
       },
       "has_llms_txt": true,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:21:05+00:00"
+      "scanned_at": "2026-10-19T22:29:02+00:00"
     },
     {
       "domain": "mozilla.org",
       "url": "https://www.mozilla.org/en-US/",
       "category": "Education & nonprofit",
-      "overall": 76,
+      "overall": 77,
       "grade": "C",
       "categories": {
         "crawler": 88,
-        "rendering": 100,
+        "rendering": 93,
         "structured": 61,
-        "agent": 68,
+        "agent": 88,
         "answerability": 80,
         "developer": 24
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:21:05+00:00"
+      "scanned_at": "2026-10-19T22:29:02+00:00"
     },
     {
       "domain": "redcross.org",
       "url": "https://www.redcross.org/",
       "category": "Education & nonprofit",
-      "overall": 81,
+      "overall": 83,
       "grade": "B",
       "categories": {
         "crawler": 85,
         "rendering": 81,
         "structured": 83,
-        "agent": 52,
+        "agent": 67,
         "answerability": 100,
         "developer": null
       },
       "has_llms_txt": false,
       "blocked_answer_bots": [],
       "critical_failures": [],
-      "scanned_at": "2026-10-18T23:21:07+00:00"
+      "scanned_at": "2026-10-19T22:29:04+00:00"
     }
   ],
   "failed": [
     {
-      "domain": "openai.com",
-      "error": "Blocks automated visitors (HTTP 403)"
-    },
-    {
       "domain": "perplexity.ai",
-      "error": "Blocks automated visitors (HTTP 403)"
-    },
-    {
-      "domain": "canva.com",
       "error": "Blocks automated visitors (HTTP 403)"
     },
     {

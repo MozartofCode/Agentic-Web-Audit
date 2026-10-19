@@ -205,8 +205,10 @@ Response (200):
   "ai_preview": {                 // LLM, qualitative only — never part of the score
     "summary": "2-3 sentences an assistant would say",
     "unknowns": [{ "fact": "Pricing", "fix": "State prices as text on /pricing" }],
-    "questions": [{ "question": "...", "answered": true, "answer": "...",
-                    "source": "https://example.com/pricing" }]   // source ∈ scanned pages
+    "questions": [{ "id": "price", "question": "How much does it cost?", "answered": true,
+                    "answer": "...", "quote": "verbatim words from the page",
+                    "source": "https://example.com/pricing",
+                    "unverified": false, "note": "" }]   // blind-reader test, see below
   },
   "fix_pack": {
     "platform": { "id": "wordpress", "name": "WordPress", "evidence": "..." },  // nullable
@@ -251,6 +253,12 @@ Error (400):
 | `GET /og/{id}.png` | 1200×630 social card for a report |
 | `GET /share/{id}` | HTML with Open Graph/Twitter tags for link-preview bots; redirects people to `FRONTEND_URL/r/{id}` |
 | `GET /leaderboard` | ranked measured scores for the curated `LEADERBOARD_SITES`, plus headline stats and sites that blocked the scanner; served from `backend/data/leaderboard.json` |
+
+**Blind-reader test** (`blind_reader.py`): `ai_preview.questions` is always the fixed
+`BLIND_QUESTIONS` set (never LLM-chosen), answered from exactly the page text in
+`prompts.prompt_texts()`. An answer counts only if its quote is found on a page we showed the
+model (`quote_found`); otherwise `unverified` is set. Cloudflare-obfuscated emails never count
+(`note` explains). Empty for GitHub-only scans. Keep it out of the score.
 
 **Leaderboard:** `cd backend && python leaderboard.py` rescans every site in
 `leaderboard.LEADERBOARD_SITES` (`--only a.com b.com` to rescan a few) and rewrites the snapshot.

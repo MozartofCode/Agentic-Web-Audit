@@ -27,12 +27,16 @@ class AIUnknown(BaseModel):
 
 
 class AIQuestion(BaseModel):
-    """A question customers are likely to ask an AI, and whether the site answers it."""
+    """One blind-reader question and whether the raw HTML answers it (see blind_reader.py)."""
 
-    question: str
-    answered: bool = False
+    id: str = ""  # blind_reader.BLIND_QUESTIONS id
+    question: str = ""
+    answered: bool = False  # True only when the quote was found on the cited page
     answer: str = ""  # short answer drawn from the site; empty when not answered
-    source: str = ""  # URL of the scanned page that answers it
+    quote: str = ""  # words copied from the page, verified by code
+    source: str = ""  # URL of the scanned page the quote is on
+    unverified: bool = False  # the model claimed an answer but its quote wasn't on the page
+    note: str = ""  # why a seemingly answered question doesn't count (e.g. hidden email)
 
 
 class AIPreview(BaseModel):
@@ -42,29 +46,13 @@ class AIPreview(BaseModel):
     unknowns: list[AIUnknown] = []
     questions: list[AIQuestion] = []
 
-    def grounded_in(self, page_urls: list[str]) -> "AIPreview":
-        """
-        Copy with every cited source checked against the pages actually scanned.
-
-        A question cited to a page we never sent the model is downgraded to "not answered",
-        so the report never links to a source that doesn't exist.
-        """
-        allowed = {u.rstrip("/") for u in page_urls}
-        questions = []
-        for q in self.questions[:MAX_AI_QUESTIONS]:
-            if not q.question.strip():
-                continue
-            grounded = q.answered and (not allowed or q.source.rstrip("/") in allowed)
-            questions.append(
-                AIQuestion(
-                    question=q.question.strip(),
-                    answered=grounded,
-                    answer=q.answer.strip() if grounded else "",
-                    source=q.source if grounded and allowed else "",
-                )
-            )
+    def cleaned(self) -> "AIPreview":
+        """Copy with blank entries dropped and lists capped."""
         unknowns = [u for u in self.unknowns if u.fact.strip()][:MAX_AI_UNKNOWNS]
-        return AIPreview(summary=self.summary.strip(), unknowns=unknowns, questions=questions)
+        return AIPreview(
+            summary=self.summary.strip(), unknowns=unknowns,
+            questions=self.questions[:MAX_AI_QUESTIONS],
+        )
 
 
 BusinessType = Literal[

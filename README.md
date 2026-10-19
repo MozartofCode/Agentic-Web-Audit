@@ -8,8 +8,11 @@ exact fixes to paste in.
 - **Measured AI-readiness score** — 37 deterministic checks across AI crawler access,
   readability without JavaScript, structured data, agent discovery (llms.txt), answerability
   and a developer track. Every check shows what was found, why it matters, and a fix.
-- **How AI sees you** — what an assistant would likely say about your site, what it can't
-  find out, and which common customer questions your pages answer.
+- **Blind-reader test** — an AI gets only the raw HTML a crawler receives and answers eight
+  standard customer questions (price, contact, how to start, …). An answer only counts if
+  its quote is really on your page — the model proposes, code verifies.
+- **How AI sees you** — what an assistant would likely say about your site, and what it
+  can't find out.
 - **Top 5 fixes** — ranked by impact and effort, with the estimated points each one is worth.
 - **Fix-it pack** — `llms.txt`, a `robots.txt` patch, JSON-LD and meta tags, with steps for
   your platform (WordPress, Shopify, Webflow, …); plus an OpenAPI draft and MCP server
@@ -27,8 +30,9 @@ exact fixes to paste in.
    homepage as an AI bot to see whether a firewall treats bots differently.
 2. **Measure.** 37 deterministic checks score six categories. No AI decides a pass or a
    fail, so the same site always gets the same score.
-3. **Explain.** One LLM call writes the "How AI sees you" preview and the product facts used
-   for the fix-it pack. It is shown separately and never changes the score.
+3. **Explain.** One LLM call writes the "How AI sees you" preview, answers the blind-reader
+   questions with quotes (each quote is then checked against the page text), and extracts the
+   product facts used for the fix-it pack. None of it changes the score.
 
 The scanner reads a sample of each site, not every page. See [`CLAUDE.md`](CLAUDE.md) for the
 exact limits and why they're there.
